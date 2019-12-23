@@ -29,7 +29,7 @@ export class JiraImport {
     // first import
     // const jql = 'project=CRW AND status not in (closed, resolved)';
     // update
-    const jql = "project=CRW AND updated>=-4D";
+    const jql = "project=CRW AND updated>=-1D";
     const data = await jira.search.search({ jql, maxResults: 0 });
     const total = data.total;
     let nbRead = 0;

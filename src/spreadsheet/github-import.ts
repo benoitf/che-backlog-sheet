@@ -20,7 +20,7 @@ export class GithubImport {
   public async import(): Promise<void> {
 
     // const PREVIOUS_DAYS = 3600;
-    const PREVIOUS_DAYS = 4;
+    const PREVIOUS_DAYS = 1;
 
     // compute 180 days from now in the past
     const beforeDate = new Date();
