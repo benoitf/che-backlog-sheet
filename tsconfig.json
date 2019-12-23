@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "./scripts",
+    "sourceMap": true,
+    "noEmitOnError": true,
+    "noImplicitReturns" : true,
+    "noImplicitThis": true,
+    "noUnusedLocals": false,
+    "removeComments": true,
+    "noFallthroughCasesInSwitch": true,
+    "strict": true
+  }
+,
+  "include": [
+    "src/**/*"
+  ]
+,
+  "exclude": [
+    "node_modules",
+    "server"
+  ]
+}

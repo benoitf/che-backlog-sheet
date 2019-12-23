@@ -1,0 +1,16 @@
+node_modules
+.DS_Store*
+.hubot_history
+~*
+*~
+.idea/
+coverage
+.classpath
+.eclipse
+*.iml
+*.che
+.nyc_output
+scripts/*
+logs/*
+start.sh
+
