@@ -28,7 +28,7 @@ const githubPush: Octokit = new Octokit({ auth: `token ${githubPushToken}` });
 
 const init = async function() {
   const auth = await new Authentication().init();
-  const googleSheet = new GoogleSheet(auth, "1GX_KLUFmgzweqjUckXaNOTK7WZrScyv8UHoVw8tgeas");
+  const googleSheet = new GoogleSheet(auth, "15GkuWX0m06PkFXe7p2fhvHVJrwSgO-ifK61ffjg7Wcs");
   const dropDownInitializer = new DropDownInitializer(googleSheet, "internal-dropdown");
 
   // header
