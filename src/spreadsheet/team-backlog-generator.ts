@@ -63,7 +63,7 @@ export class TeamBacklogGenerator {
       const teamBacklogLinkColumn = teamBacklogHeader.findIndex((data: string) => data.toLowerCase() === "link");
 
       // for each issue of backlog that includes the team, add the row if it doesn't exists
-      const teamIssues = backlogRows.filter((row: any) => (row[backlogTeamColumn].includes(teamName)));
+      const teamIssues = backlogRows.filter((row: any) => (row[backlogTeamColumn] && row[backlogTeamColumn].includes(teamName)));
 
       // get only issues included
       const includedTeamIssues = teamIssues.filter((row: any) => (row[backlogIncludeColumn] === "TRUE"));
