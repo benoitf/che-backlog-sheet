@@ -174,7 +174,7 @@ export class JiraImport {
     areasTeams.set("stacks, sidecars & devfiles", "languages");
     areasTeams.set("testing", "qe");
     areasTeams.set("theia (upstream)", "editors");
-    areasTeams.set("workshop-rhpds", "stevan");
+    areasTeams.set("workshop-rhpds", "devex");
 
     const matchingTeams: string[] = [];
     // get areas label
