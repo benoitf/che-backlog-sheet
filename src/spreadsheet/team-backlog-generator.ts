@@ -43,6 +43,7 @@ export class TeamBacklogGenerator {
     teamSheetIds.set("platform", 615179376);
     teamSheetIds.set("plugins", 620995623);
     teamSheetIds.set("pm", 500634577);
+    teamSheetIds.set("qe", 287072407);
     teamSheetIds.set("productization", 52078153);
 
     Array.from(teamSheetIds.keys()).forEach(async (teamName) => {
