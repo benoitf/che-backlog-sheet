@@ -202,7 +202,7 @@ export class JiraImport {
   }
 
   public getState(issueData: any): string {
-    if (issueData.fields.status.name !== "closed" && issueData.fields.status.name !== "resolved") {
+    if (!issueData.fields.status.name || (issueData.fields.status.name.toLowerCase() !== "closed" && issueData.fields.status.name.toLowerCase() !== "resolved")) {
       return "open";
     } else {
       return "closed";
