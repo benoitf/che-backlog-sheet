@@ -158,11 +158,20 @@ export class GithubImport {
   public getTeam(issueInfo: IssueInfo): string {
 
     // first search if there is an assigned team
-    const foundTeams: string[] = [];
+    let foundTeams: string[] = [];
     const teamLabels = issueInfo.geTeamLabels();
     teamLabels.forEach((label) => {
       if (label.startsWith("team/")) {
         foundTeams.push(label.substring("team/".length));
+      }
+    });
+
+    // team/languages is mapped to team/plugin
+    foundTeams = foundTeams.map(label => {
+      if (label === 'languages') {
+        return 'plugins';
+      } else {
+        return label;
       }
     });
 

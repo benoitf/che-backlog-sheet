@@ -39,7 +39,6 @@ export class TeamBacklogGenerator {
     teamSheetIds.set("doc", 1387892873);
     teamSheetIds.set("editors", 147601621);
     teamSheetIds.set("hosted-che", 602575269);
-    teamSheetIds.set("languages", 374504802);
     teamSheetIds.set("platform", 615179376);
     teamSheetIds.set("plugins", 620995623);
     teamSheetIds.set("pm", 500634577);
