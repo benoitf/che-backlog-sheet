@@ -192,9 +192,8 @@ export class GithubImport {
     areasTeams.set("area/wsmaster", "platform");
     areasTeams.set("area/factories", "platform");
     areasTeams.set("area/security", "platform");
-    areasTeams.set("area/wsmaster", "platform");
     areasTeams.set("area/teams", "platform");
-    areasTeams.set("area/workspaces/sharing", "platform");
+    areasTeams.set("area/workspace-sharing", "platform");
     areasTeams.set("area/jwt-proxy", "platform");
 
     areasTeams.set("area/cli", "deploy");
@@ -213,14 +212,16 @@ export class GithubImport {
     areasTeams.set("area/infra/kubernetes", "controller");
     areasTeams.set("area/infra/openshift", "controller");
     areasTeams.set("area/ts-workspace-client", "controller");
-
-    areasTeams.set("area/debugger", "languages");
-    areasTeams.set("area/devfile-registry", "languages");
-    areasTeams.set("area/languages", "languages");
-    areasTeams.set("area/lsp-support", "languages");
-    areasTeams.set("area/samples", "languages");
-    areasTeams.set("area/stacks", "languages");
-
+    areasTeams.set("area/workspace-client-lib", "controller");
+    areasTeams.set("area/workspace-loader", "controller");
+    
+    areasTeams.set("area/debugger", "plugins");
+    areasTeams.set("area/devfile-registry", "plugins");
+    areasTeams.set("area/languages", "plugins");
+    areasTeams.set("area/lsp-support", "plugins");
+    areasTeams.set("area/samples", "plugins");
+    areasTeams.set("area/stacks", "plugins");
+    areasTeams.set("area/plugin-port", "plugins");
     areasTeams.set("area/plugin-registry", "plugins");
     areasTeams.set("area/plugins", "plugins");
     areasTeams.set("area/git", "plugins");
@@ -231,6 +232,9 @@ export class GithubImport {
     areasTeams.set("area/dev-experience", "devex");
 
     areasTeams.set("area/doc", "documentation");
+
+    areasTeams.set("area/qe", "qe");
+
 
     const matchingTeams: string[] = [];
     // get areas label

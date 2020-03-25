@@ -161,20 +161,19 @@ export class JiraImport {
   public getTeam(issueData: any): string {
 
     const areasTeams = new Map();
-
-    areasTeams.set("build & internals", "productization");
-    areasTeams.set("che (upstream)", "platform");
-    areasTeams.set("crwctl", "deploy");
-    areasTeams.set("docs", "documentation");
+    areasTeams.set("controller: dashboard, k8s/os infra, plugin brokers", "controller");
+    areasTeams.set("deploy: cli, install, machine-exec, operator", "deploy");
+    areasTeams.set("devex: workshops, RHPDS", "devex");
+    areasTeams.set("docs", "docs");
+    areasTeams.set("editors: theia", "editors");
+    areasTeams.set("languages: debugger, devfiles, lsp, samples, stacks", "plugins");
     areasTeams.set("ocp", "qe");
-    areasTeams.set("operator", "controller");
-    areasTeams.set("registries", "productization");
-    areasTeams.set("security & legal", "productization");
-    areasTeams.set("server", "platform");
-    areasTeams.set("stacks, sidecars & devfiles", "languages");
+    areasTeams.set("platform: jwtproxy, wsmaster, devfile spec, teams, security, sharing, factory api", "platform");
+    areasTeams.set("plugins: registries, factories, git", "plugins");
+    areasTeams.set("productization: build & internals", "productization");
+    areasTeams.set("productization: security & legal", "productization");
     areasTeams.set("testing", "qe");
-    areasTeams.set("theia (upstream)", "editors");
-    areasTeams.set("workshop-rhpds", "devex");
+    
 
     const matchingTeams: string[] = [];
     // get areas label
