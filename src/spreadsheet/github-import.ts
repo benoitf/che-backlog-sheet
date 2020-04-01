@@ -43,8 +43,7 @@ export class GithubImport {
   }
 
   public async handleIssues(issueData: any): Promise<void> {
-    const rawGithubIssuesInfos: IssueInfo[] = issueData.map((issueData: any) => new IssueInfo(issueData, "che"));
-    const githubIssuesInfos = rawGithubIssuesInfos.filter((issueInfo) => !issueInfo.hasLabel("kind/question"));
+    const githubIssuesInfos: IssueInfo[] = issueData.map((issueData: any) => new IssueInfo(issueData, "che"));
 
     const sheetData = await this.googleSheet.getData({ range: "backlog!A1:U" });
     const rows = sheetData.values;
