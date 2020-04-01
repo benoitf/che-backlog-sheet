@@ -88,7 +88,7 @@ export class TeamBacklogGenerator {
           const backlogRow = backlogRows[indexFromBacklog];
           const teamValue = backlogRow[backlogTeamColumn];
           // team is not included in the issue !
-          if (!teamValue.includes(teamName)) {
+          if (teamValue && teamValue.includes(teamName)) {
             // update first column to remove assignment
 
             const rowNumber = teamBackLogIssueMapping.get(teamIssueLink);
