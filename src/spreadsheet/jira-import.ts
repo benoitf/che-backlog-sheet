@@ -82,6 +82,8 @@ export class JiraImport {
         issueDef.title = this.getTitle(issueData);
         issueDef.link = issueLink;
         issueDef.state = this.getState(issueData);
+        issueDef.status = this.getStatus(issueData);
+        issueDef.milestone = this.getMilestone(issueData);
 
         // update row columns
         const update = {
@@ -94,21 +96,12 @@ export class JiraImport {
       } else {
         const issueDef: RawDefinition = {
           team: this.getTeam(issueData),
-          sizing: "---",
           include: this.isIncluded(issueData),
-          qeImpact: false,
-          docImpact: false,
-          neededCRW: true,
-          mvpCRW: "",
-          mvpCHE: "",
-          quarter: "---",
-          customerCase: "",
-          status: "---",
-          atRisk: "",
+          status: this.getStatus(issueData),
+          milestone: this.getMilestone(issueData),
           kind: this.getKind(issueData),
           labels: "",
           severity: this.getSeverity(issueData),
-          theme: "---",
           title: this.getTitle(issueData),
           link: issueLink,
           comments: "",
@@ -146,6 +139,27 @@ export class JiraImport {
   public getKind(issueData: any): string {
     if (issueData.fields.issuetype && issueData.fields.issuetype.name) {
       return issueData.fields.issuetype.name.toLowerCase();
+    }
+    return "";
+  }
+
+  public getStatus(issueData: any): string {
+    if (issueData.fields.status && issueData.fields.status.name) {
+      return issueData.fields.status.name.toLowerCase();
+    }
+    return "";
+  }
+
+  public getMilestone(issueData: any): string {
+    if (issueData.fields.fixVersions) {
+      const versions = issueData.fields.fixVersions;
+      let milestones: string[] = [];
+      if (versions.length > 0) {
+        versions.forEach((version: any) => {
+          milestones.push(version.name)
+        })
+        return milestones.join(',');
+      }
     }
     return "";
   }

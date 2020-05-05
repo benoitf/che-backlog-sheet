@@ -1,13 +1,17 @@
-import * as Octokit from "@octokit/rest";
+import {Endpoints} from "@octokit/types";
+
+type IssuesGetResponseData = Endpoints["GET /repos/:owner/:repo/issues/:issue_number"]["response"]["data"];
+
 /**
  * Info is a high level of the underlying data associated to an issue.
  */
 export class IssueInfo {
 
-  private issueData: Octokit.IssuesGetResponse;
+
+  private issueData: IssuesGetResponseData;
   private repoName: string;
 
-  constructor(issueData: Octokit.IssuesGetResponse, repoName: string) {
+  constructor(issueData: IssuesGetResponseData, repoName: string) {
     this.issueData = issueData;
     this.repoName = repoName;
   }
@@ -83,6 +87,10 @@ export class IssueInfo {
 
   public getSeverityLabels(): string[] {
     return this.getLabels("severity");
+  }
+
+  public getStatusLabels(): string[] {
+    return this.getLabels("status");
   }
 
   public getAreaLabels(): string[] {

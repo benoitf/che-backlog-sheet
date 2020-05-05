@@ -1,4 +1,3 @@
-import { DropDownInitializer } from "./drop-down-initializer";
 import { GoogleSheet } from "./google-sheet";
 import { ValidationProducer } from "./validation-producer";
 
@@ -9,8 +8,8 @@ export class ValidationUpdater {
 
   private validationProducer: ValidationProducer;
 
-  constructor(private googleSheet: GoogleSheet, private dropDownInitializer: DropDownInitializer) {
-    this.validationProducer = new ValidationProducer(dropDownInitializer, 0);
+  constructor(private googleSheet: GoogleSheet) {
+    this.validationProducer = new ValidationProducer(0);
   }
 
   public async update(): Promise<void> {
@@ -25,18 +24,7 @@ export class ValidationUpdater {
 
     // now prepare the requests
     const requests = [];
-    requests.push(this.validationProducer.getRangRequest(endRowIndex, header, "sizing"));
-    requests.push(this.validationProducer.getRangRequest(endRowIndex, header, "theme"));
-    requests.push(this.validationProducer.getRangRequest(endRowIndex, header, "quarter"));
-    requests.push(this.validationProducer.getRangRequest(endRowIndex, header, "status"));
-    requests.push(this.validationProducer.getRangRequest(endRowIndex, header, "team"));
-
-    // checkboxes
     requests.push(this.validationProducer.getCheckBoxRequest(endRowIndex, header, "Include"));
-    requests.push(this.validationProducer.getCheckBoxRequest(endRowIndex, header, "Needed CRW"));
-    requests.push(this.validationProducer.getCheckBoxRequest(endRowIndex, header, "QE Impact"));
-    requests.push(this.validationProducer.getCheckBoxRequest(endRowIndex, header, "Doc Impact"));
-
     await this.googleSheet.batchUpdateOneOfRangeRequests(requests);
   }
 

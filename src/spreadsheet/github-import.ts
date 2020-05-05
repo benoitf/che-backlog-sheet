@@ -1,4 +1,4 @@
-import Octokit = require("@octokit/rest");
+import { Octokit } from "@octokit/rest";
 import { IssueInfo } from "../issue/issue-info";
 import { Authentication } from "./authentication";
 import { GoogleSheet } from "./google-sheet";
@@ -18,16 +18,19 @@ export class GithubImport {
   }
 
   public async import(): Promise<void> {
-
     // const PREVIOUS_DAYS = 3600;
-    const PREVIOUS_DAYS = 1;
+    const PREVIOUS_DAYS = 200;
 
-    // compute 180 days from now in the past
+    // compute PREVIOUS_DAYS days from now in the past
     const beforeDate = new Date();
     beforeDate.setDate(beforeDate.getDate() - PREVIOUS_DAYS);
     const simpleDate = beforeDate.toISOString().substring(0, 10);
 
-    // get all opened issues after this date
+    await this.importChe(simpleDate);
+    await this.importRedhatChe(simpleDate);
+  }
+
+  public async importChe(simpleDate: string): Promise<void> {
 
     // get all issues not updated since this date and that are not in frozen state
     const options = this.githubRead.search.issuesAndPullRequests.endpoint.merge({
@@ -41,6 +44,32 @@ export class GithubImport {
     await this.handleIssues(response);
 
   }
+
+  public async importRedhatChe(simpleDate: string): Promise<void> {
+    // get all issues not updated since this date and that are not in frozen state
+    const options = this.githubRead.search.issuesAndPullRequests.endpoint.merge({
+      q: `repo:redhat-developer/rh-che updated:>=${simpleDate} is:issue`, // state:open for first import
+      sort: "updated",
+      order: "asc",
+      per_page: 100,
+    });
+
+    const response = await this.githubRead.paginate(options);
+
+    // update to include team to be hosted-che
+    const updatedIssues = response.map((issueData: any) => {
+      let labels = issueData.labels;
+      const hostedCheLabel = {name: 'area/hosted-che' };
+      if (!labels) {
+        issueData.labels = [hostedCheLabel];
+      } else {
+        issueData.labels.push(hostedCheLabel);
+      }
+      return issueData;
+    });
+    await this.handleIssues(updatedIssues);
+
+  }  
 
   public async handleIssues(issueData: any): Promise<void> {
     const githubIssuesInfos: IssueInfo[] = issueData.map((issueData: any) => new IssueInfo(issueData, "che"));
@@ -63,7 +92,7 @@ export class GithubImport {
 
     const insertRows: string[][] = [];
     const batchUpdates: any[] = [];
-    githubIssuesInfos.map((issueInfo) => {
+    githubIssuesInfos.forEach((issueInfo) => {
       // get mapping of the issue if exists
 
       if (issueMapping.has(issueInfo.humanUrl())) {
@@ -79,6 +108,8 @@ export class GithubImport {
         issueDef.link = issueInfo.humanUrl();
         issueDef.title = issueInfo.title();
         issueDef.state = this.getState(issueInfo);
+        issueDef.milestone = this.getMilestone(issueInfo);
+        issueDef.status = this.getStatus(issueInfo);
 
         // update row columns
         const update = {
@@ -92,21 +123,12 @@ export class GithubImport {
 
         const issueDef: RawDefinition = {
           team: this.getTeam(issueInfo),
-          sizing: "---",
           include: this.isIncluded(issueInfo),
-          qeImpact: false,
-          docImpact: false,
-          neededCRW: false,
-          mvpCRW: "",
-          mvpCHE: "",
-          quarter: "---",
-          customerCase: "",
-          status: "---",
-          atRisk: "",
+          status: this.getStatus(issueInfo),
+          milestone: this.getMilestone(issueInfo),
           kind: this.getKind(issueInfo),
           labels: issueInfo.labels().join(","),
           severity: this.getSeverity(issueInfo),
-          theme: "---",
           title: issueInfo.title(),
           link: issueInfo.humanUrl(),
           comments: "",
@@ -116,7 +138,6 @@ export class GithubImport {
 
         // insert new row at the bottom
         insertRows.push(this.rowUpdater.getRow(issueDef));
-
       }
 
     });
@@ -154,6 +175,18 @@ export class GithubImport {
     }
   }
 
+  public getStatus(issueInfo: IssueInfo): string {
+    if (issueInfo.getStatusLabels().length > 0) {
+      return issueInfo.getStatusLabels()[0].substring("status/".length);
+    } else {
+      return "";
+    }
+  }
+
+  public getMilestone(issueInfo: IssueInfo): string {
+    return issueInfo.milestone();
+  }
+
   public getTeam(issueInfo: IssueInfo): string {
 
     // first search if there is an assigned team
@@ -169,6 +202,8 @@ export class GithubImport {
     foundTeams = foundTeams.map(label => {
       if (label === 'languages') {
         return 'plugins';
+      } else if (label === 'rhche-qe') {
+        return 'hosted-che';
       } else {
         return label;
       }
@@ -248,7 +283,7 @@ export class GithubImport {
     matchingTeams.sort();
 
     if (matchingTeams.length === 0) {
-      return "---";
+      return "";
     } else if (matchingTeams.length === 1) {
       return matchingTeams[0];
     } else {

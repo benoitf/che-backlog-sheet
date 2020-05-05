@@ -1,5 +1,3 @@
-import Octokit = require("@octokit/rest");
-import { DropDownInitializer } from "./drop-down-initializer";
 import { GoogleSheet } from "./google-sheet";
 import { RawDefinition, TeamRawDefinition } from "./raw-definition";
 import { RowUpdater } from "./row-updater";
@@ -11,7 +9,6 @@ export class TeamBacklogGenerator {
   constructor(
     private googleSheet: GoogleSheet,
     private rowUpdater: RowUpdater,
-    private dropDownInitializer: DropDownInitializer,
   ) {
   }
 
@@ -122,9 +119,10 @@ export class TeamBacklogGenerator {
           teamIssueDef.severity = backlogIssueDef.severity;
           teamIssueDef.title = backlogIssueDef.title;
           teamIssueDef.kind = backlogIssueDef.kind;
-          teamIssueDef.theme = backlogIssueDef.theme;
+          teamIssueDef.milestone = backlogIssueDef.milestone;
           teamIssueDef.otherTeam = backlogIssueDef.team;
           teamIssueDef.state = backlogIssueDef.state;
+          teamIssueDef.status = backlogIssueDef.status;
           teamIssueDef.assignment = "TRUE";
 
           // update row columns
@@ -139,16 +137,16 @@ export class TeamBacklogGenerator {
 
           const teamIssueDef: TeamRawDefinition = {
             assignment: "TRUE",
-            sprint: "---",
             priority: issuePriority,
             severity: backlogIssueDef.severity,
             title: backlogIssueDef.title,
             kind: backlogIssueDef.kind,
             link: backlogIssueDef.link,
-            theme: backlogIssueDef.theme,
+            milestone: backlogIssueDef.milestone,
             otherTeam: backlogIssueDef.team,
             comments: "",
             state: backlogIssueDef.state,
+            status: backlogIssueDef.status,
 
           };
 
@@ -169,7 +167,7 @@ export class TeamBacklogGenerator {
         await this.googleSheet.valuesBatchUpdate(batchUpdates);
       }
 
-      const teamValidationUpdater = new TeamValidationUpdater(this.googleSheet, this.dropDownInitializer, teamSheetName, sheetId);
+      const teamValidationUpdater = new TeamValidationUpdater(this.googleSheet, teamSheetName, sheetId);
       await teamValidationUpdater.update();
     });
 

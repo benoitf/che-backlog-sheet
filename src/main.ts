@@ -1,6 +1,5 @@
-import * as Octokit from "@octokit/rest";
+import { Octokit } from "@octokit/rest";
 import { Authentication } from "./spreadsheet/authentication";
-import { DropDownInitializer } from "./spreadsheet/drop-down-initializer";
 import { GithubImport } from "./spreadsheet/github-import";
 import { GoogleSheet } from "./spreadsheet/google-sheet";
 import { JiraImport } from "./spreadsheet/jira-import";
@@ -29,25 +28,21 @@ const githubPush: Octokit = new Octokit({ auth: `token ${githubPushToken}` });
 const init = async function() {
   const auth = await new Authentication().init();
   const googleSheet = new GoogleSheet(auth, "15GkuWX0m06PkFXe7p2fhvHVJrwSgO-ifK61ffjg7Wcs");
-  const dropDownInitializer = new DropDownInitializer(googleSheet, "internal-dropdown");
 
   // header
   const header = await googleSheet.getHeader(GoogleSheet.SHEET_NAME);
   const rowUpdater = new RowUpdater(header);
-
-  // compute dropDown definition
-  await dropDownInitializer.init();
 
   // now, perform the github import
   await new GithubImport(githubRead, googleSheet, rowUpdater).import();
   await new JiraImport(jiraToken, googleSheet, rowUpdater).import();
 
   // now, apply validation
-  const updateValidation = new ValidationUpdater(googleSheet, dropDownInitializer);
+  const updateValidation = new ValidationUpdater(googleSheet);
   await updateValidation.update();
 
   // generate sheet data for each team
-  await new TeamBacklogGenerator(googleSheet, rowUpdater, dropDownInitializer).import();
+  await new TeamBacklogGenerator(googleSheet, rowUpdater).import();
 
 };
 

@@ -10,9 +10,10 @@ export class TeamRowUpdater {
   public static KIND = "Kind";
   public static LINK = "Link";
   public static COMMENTS = "Comments";
-  public static THEME = "Theme";
+  public static MILESTONE = "Milestone";
   public static OTHER_TEAM = "Other Team";
   public static STATE = "State";
+  public static STATUS = "Status";
 
   private mapping: Map<string, number>;
 
@@ -27,9 +28,10 @@ export class TeamRowUpdater {
     this.defineMapping(TeamRowUpdater.KIND);
     this.defineMapping(TeamRowUpdater.LINK);
     this.defineMapping(TeamRowUpdater.COMMENTS);
-    this.defineMapping(TeamRowUpdater.THEME);
+    this.defineMapping(TeamRowUpdater.MILESTONE);
     this.defineMapping(TeamRowUpdater.OTHER_TEAM);
     this.defineMapping(TeamRowUpdater.STATE);
+    this.defineMapping(TeamRowUpdater.STATUS);
 
   }
 
@@ -46,8 +48,8 @@ export class TeamRowUpdater {
       buildRow[this.mapping.get(TeamRowUpdater.ASSIGNMENT)!] = rawDefinition.assignment;
     }
 
-    if (this.mapping.has(TeamRowUpdater.SPRINT)) {
-      buildRow[this.mapping.get(TeamRowUpdater.SPRINT)!] = rawDefinition.sprint;
+    if (this.mapping.has(TeamRowUpdater.MILESTONE)) {
+      buildRow[this.mapping.get(TeamRowUpdater.MILESTONE)!] = rawDefinition.milestone;
     }
     if (this.mapping.has(TeamRowUpdater.PRIORITY)) {
       buildRow[this.mapping.get(TeamRowUpdater.PRIORITY)!] = rawDefinition.priority;
@@ -67,14 +69,14 @@ export class TeamRowUpdater {
     if (this.mapping.has(TeamRowUpdater.COMMENTS)) {
       buildRow[this.mapping.get(TeamRowUpdater.COMMENTS)!] = rawDefinition.comments;
     }
-    if (this.mapping.has(TeamRowUpdater.THEME)) {
-      buildRow[this.mapping.get(TeamRowUpdater.THEME)!] = rawDefinition.theme;
-    }
     if (this.mapping.has(TeamRowUpdater.OTHER_TEAM)) {
       buildRow[this.mapping.get(TeamRowUpdater.OTHER_TEAM)!] = rawDefinition.otherTeam;
     }
     if (this.mapping.has(TeamRowUpdater.STATE)) {
       buildRow[this.mapping.get(TeamRowUpdater.STATE)!] = rawDefinition.state;
+    }
+    if (this.mapping.has(TeamRowUpdater.STATUS)) {
+      buildRow[this.mapping.get(TeamRowUpdater.STATUS)!] = rawDefinition.status;
     }
 
     return buildRow;
@@ -84,16 +86,16 @@ export class TeamRowUpdater {
   public getDefinition(row: string[]): TeamRawDefinition {
     return {
       assignment: row[this.mapping.get(TeamRowUpdater.ASSIGNMENT)!],
-      sprint: row[this.mapping.get(TeamRowUpdater.SPRINT)!],
+      milestone: row[this.mapping.get(TeamRowUpdater.MILESTONE)!],
       priority: row[this.mapping.get(TeamRowUpdater.PRIORITY)!],
       severity: row[this.mapping.get(TeamRowUpdater.SEVERITY)!],
       title: row[this.mapping.get(TeamRowUpdater.TITLE)!],
       kind: row[this.mapping.get(TeamRowUpdater.KIND)!],
       link: row[this.mapping.get(TeamRowUpdater.LINK)!],
-      theme: row[this.mapping.get(TeamRowUpdater.THEME)!],
-      otherTeam: row[this.mapping.get(TeamRowUpdater.THEME)!],
+      otherTeam: row[this.mapping.get(TeamRowUpdater.OTHER_TEAM)!],
       comments: row[this.mapping.get(TeamRowUpdater.COMMENTS)!],
       state: row[this.mapping.get(TeamRowUpdater.STATE)!],
+      status: row[this.mapping.get(TeamRowUpdater.STATUS)!],
     };
   }
 

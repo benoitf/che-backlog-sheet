@@ -1,4 +1,3 @@
-import { DropDownInitializer } from "./drop-down-initializer";
 import { GoogleSheet } from "./google-sheet";
 import { ValidationProducer } from "./validation-producer";
 
@@ -7,8 +6,8 @@ export class TeamValidationUpdater {
 
   private validationProducer: ValidationProducer;
 
-  constructor(private googleSheet: GoogleSheet, dropDownInitializer: DropDownInitializer, private sheetName: string, private sheetId: number) {
-    this.validationProducer = new ValidationProducer(dropDownInitializer, sheetId);
+  constructor(private googleSheet: GoogleSheet, private sheetName: string, private sheetId: number) {
+    this.validationProducer = new ValidationProducer(sheetId);
   }
 
   public async update(): Promise<void> {
@@ -23,8 +22,6 @@ export class TeamValidationUpdater {
 
     // now prepare the requests
     const requests = [];
-    requests.push(this.validationProducer.getRangRequest(endRowIndex, header, "sprint"));
-
     // checkboxes
     requests.push(this.validationProducer.getCheckBoxRequest(endRowIndex, header, "Assignment"));
 
