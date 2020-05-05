@@ -29,7 +29,7 @@ export class JiraImport {
     // first import
     // const jql = 'project=CRW AND status not in (closed, resolved)';
     // update
-    const jql = "project=CRW AND updated>=-1D";
+    const jql = "project=CRW AND updated>=-20D";
     const data = await jira.search.search({ jql, maxResults: 0 });
     const total = data.total;
     let nbRead = 0;
@@ -175,14 +175,15 @@ export class JiraImport {
   public getTeam(issueData: any): string {
 
     const areasTeams = new Map();
-    areasTeams.set("controller: dashboard, k8s/os infra, plugin brokers", "controller");
+    areasTeams.set("OpenShift Command Line Terminal (cloudshell)", "controller");
+    areasTeams.set("controller: dashboard, dev-workspace, factory/dashboard, plugin broker, ts-workspace-client, workspace-loader", "controller");
     areasTeams.set("deploy: cli, install, machine-exec, operator", "deploy");
     areasTeams.set("devex: workshops, RHPDS", "devex");
     areasTeams.set("docs", "docs");
     areasTeams.set("editors: theia", "editors");
     areasTeams.set("languages: debugger, devfiles, lsp, samples, stacks", "plugins");
     areasTeams.set("ocp", "qe");
-    areasTeams.set("platform: jwtproxy, wsmaster, devfile spec, teams, security, sharing, factory api", "platform");
+    areasTeams.set("platform: jwtproxy, wsmaster, devfile spec, teams, security, sharing, factory api, monitoring", "platform");
     areasTeams.set("plugins: registries, factories, git", "plugins");
     areasTeams.set("productization: build & internals", "productization");
     areasTeams.set("productization: security & legal", "productization");
@@ -196,9 +197,11 @@ export class JiraImport {
     if (components) {
       components.forEach((component: any) => {
         const componentName = component.name || "";
-        const team = areasTeams.get(componentName);
-        if (!matchingTeams.includes(team)) {
-          matchingTeams.push(team);
+        if (componentName !== '') {
+          const team = areasTeams.get(componentName);
+          if (team && !matchingTeams.includes(team)) {
+            matchingTeams.push(team);
+          }
         }
       });
     }
