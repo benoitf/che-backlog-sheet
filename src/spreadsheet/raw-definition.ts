@@ -25,4 +25,6 @@ export interface TeamRawDefinition {
   comments: string;
   state: string;
   status: string;
+  areas: string;
+
 }

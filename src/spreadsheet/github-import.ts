@@ -127,7 +127,7 @@ export class GithubImport {
           status: this.getStatus(issueInfo),
           milestone: this.getMilestone(issueInfo),
           kind: this.getKind(issueInfo),
-          labels: issueInfo.labels().join(","),
+          labels: issueInfo.labels().join("\n"),
           severity: this.getSeverity(issueInfo),
           title: issueInfo.title(),
           link: issueInfo.humanUrl(),

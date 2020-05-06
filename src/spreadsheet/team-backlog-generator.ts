@@ -105,6 +105,7 @@ export class TeamBacklogGenerator {
         const backLogIssueLink = row[backlogLinkColumn];
         const backlogIssueDef: RawDefinition = this.rowUpdater.getDefinition(row);
 
+        const issueAreas = this.getAreaLabels(backlogIssueDef.labels);
         const issuePriority = includedTeamPriority.get(backLogIssueLink) || "";
 
         if (teamBackLogIssueMapping.has(backLogIssueLink)) {
@@ -124,10 +125,11 @@ export class TeamBacklogGenerator {
           teamIssueDef.state = backlogIssueDef.state;
           teamIssueDef.status = backlogIssueDef.status;
           teamIssueDef.assignment = "TRUE";
+          teamIssueDef.areas = issueAreas;
 
           // update row columns
           const update = {
-            range: `${teamSheetName}!A${rowNumber}:K${rowNumber}`,
+            range: `${teamSheetName}!A${rowNumber}:L${rowNumber}`,
             values: [teamRowUpdater.getRow(teamIssueDef)],
           };
 
@@ -147,6 +149,8 @@ export class TeamBacklogGenerator {
             comments: "",
             state: backlogIssueDef.state,
             status: backlogIssueDef.status,
+            areas: issueAreas,
+
 
           };
 
@@ -171,6 +175,19 @@ export class TeamBacklogGenerator {
       await teamValidationUpdater.update();
     }));
 
+  }
+
+  getAreaLabels(labelLine: string): string {
+    if (labelLine && labelLine.length > 0) {
+      const labels : string[] = [];
+      const originLabels = labelLine.split(',');
+      originLabels.forEach(originLabel => {
+        originLabel.split('\n').forEach(item => labels.push(item));
+      });
+      return labels.filter(item => item.startsWith('area/')).map(item => item.substring('area/'.length)).sort().join('\n');
+    } else {
+      return '';
+    }
   }
 
 }

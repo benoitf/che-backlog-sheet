@@ -14,6 +14,7 @@ export class TeamRowUpdater {
   public static OTHER_TEAM = "Other Team";
   public static STATE = "State";
   public static STATUS = "Status";
+  public static AREAS = "Areas";
 
   private mapping: Map<string, number>;
 
@@ -32,7 +33,7 @@ export class TeamRowUpdater {
     this.defineMapping(TeamRowUpdater.OTHER_TEAM);
     this.defineMapping(TeamRowUpdater.STATE);
     this.defineMapping(TeamRowUpdater.STATUS);
-
+    this.defineMapping(TeamRowUpdater.AREAS);
   }
 
   public defineMapping(key: string) {
@@ -48,6 +49,9 @@ export class TeamRowUpdater {
       buildRow[this.mapping.get(TeamRowUpdater.ASSIGNMENT)!] = rawDefinition.assignment;
     }
 
+    if (this.mapping.has(TeamRowUpdater.AREAS)) {
+      buildRow[this.mapping.get(TeamRowUpdater.AREAS)!] = rawDefinition.areas;
+    }
     if (this.mapping.has(TeamRowUpdater.MILESTONE)) {
       buildRow[this.mapping.get(TeamRowUpdater.MILESTONE)!] = rawDefinition.milestone;
     }
@@ -86,6 +90,7 @@ export class TeamRowUpdater {
   public getDefinition(row: string[]): TeamRawDefinition {
     return {
       assignment: row[this.mapping.get(TeamRowUpdater.ASSIGNMENT)!],
+      areas: row[this.mapping.get(TeamRowUpdater.AREAS)!],
       milestone: row[this.mapping.get(TeamRowUpdater.MILESTONE)!],
       priority: row[this.mapping.get(TeamRowUpdater.PRIORITY)!],
       severity: row[this.mapping.get(TeamRowUpdater.SEVERITY)!],
