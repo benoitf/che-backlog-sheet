@@ -155,7 +155,10 @@ export class TeamBacklogGenerator {
           };
 
           // insert new row at the bottom
-          insertRows.push(teamRowUpdater.getRow(teamIssueDef));
+          // only copy open issues
+          if (backlogIssueDef.status === 'open') {
+            insertRows.push(teamRowUpdater.getRow(teamIssueDef));
+          }
 
         }
 
