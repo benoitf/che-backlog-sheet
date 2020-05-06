@@ -42,7 +42,7 @@ export class TeamBacklogGenerator {
     teamSheetIds.set("qe", 287072407);
     teamSheetIds.set("productization", 52078153);
 
-    Array.from(teamSheetIds.keys()).forEach(async (teamName) => {
+    await Promise.all(Array.from(teamSheetIds.keys()).map(async (teamName) => {
 
       const insertRows: string[][] = [];
       const batchUpdates: any[] = [];
@@ -85,7 +85,7 @@ export class TeamBacklogGenerator {
           const backlogRow = backlogRows[indexFromBacklog];
           const teamValue = backlogRow[backlogTeamColumn];
           // team is not included in the issue !
-          if (teamValue && teamValue.includes(teamName)) {
+          if (teamValue && !teamValue.includes(teamName)) {
             // update first column to remove assignment
 
             const rowNumber = teamBackLogIssueMapping.get(teamIssueLink);
@@ -169,7 +169,7 @@ export class TeamBacklogGenerator {
 
       const teamValidationUpdater = new TeamValidationUpdater(this.googleSheet, teamSheetName, sheetId);
       await teamValidationUpdater.update();
-    });
+    }));
 
   }
 
