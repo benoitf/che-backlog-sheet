@@ -19,7 +19,7 @@ export class GithubImport {
 
   public async import(): Promise<void> {
     // const PREVIOUS_DAYS = 3600;
-    const PREVIOUS_DAYS = 1;
+    const PREVIOUS_DAYS = 3;
 
     // compute PREVIOUS_DAYS days from now in the past
     const beforeDate = new Date();
@@ -225,6 +225,7 @@ export class GithubImport {
     areasTeams.set("area/devfile", "platform");
     areasTeams.set("area/wsmaster", "platform");
     areasTeams.set("area/factories", "platform");
+    areasTeams.set("area/factory/server", "platform");
     areasTeams.set("area/security", "platform");
     areasTeams.set("area/teams", "platform");
     areasTeams.set("area/workspace-sharing", "platform");
@@ -275,7 +276,7 @@ export class GithubImport {
     const areaLabels = issueInfo.getAreaLabels();
     areaLabels.forEach((label) => {
       const team = areasTeams.get(label);
-      if (!matchingTeams.includes(team)) {
+      if (team && !matchingTeams.includes(team)) {
         matchingTeams.push(team);
       }
     });
