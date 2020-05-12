@@ -156,7 +156,7 @@ export class TeamBacklogGenerator {
 
           // insert new row at the bottom
           // only copy open issues
-          if (backlogIssueDef.status === 'open') {
+          if (backlogIssueDef.state === 'open') {
             insertRows.push(teamRowUpdater.getRow(teamIssueDef));
           }
 
