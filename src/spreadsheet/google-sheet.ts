@@ -190,4 +190,8 @@ export class GoogleSheet {
 
   }
 
+  public getID(): string {
+    return this.id;
+  }
+
 }

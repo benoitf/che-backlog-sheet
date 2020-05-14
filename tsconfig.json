@@ -11,7 +11,9 @@
     "noUnusedLocals": false,
     "removeComments": true,
     "noFallthroughCasesInSwitch": true,
-    "strict": true
+    "strict": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true
   }
 ,
   "include": [

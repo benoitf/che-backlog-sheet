@@ -3,13 +3,92 @@ import { RawDefinition, TeamRawDefinition } from "./raw-definition";
 import { RowUpdater } from "./row-updater";
 import { TeamRowUpdater } from "./team-row-updater";
 import { TeamValidationUpdater } from "./team-validation-updater";
+import request = require("request");
 
 export class TeamBacklogGenerator {
 
+  private teamSheetIds: Map<string, number>;
   constructor(
     private googleSheet: GoogleSheet,
     private rowUpdater: RowUpdater,
   ) {
+    this.teamSheetIds  = new Map();
+    this.teamSheetIds.set("controller", 559612723);
+    this.teamSheetIds.set("deploy", 299792844);
+    this.teamSheetIds.set("devex", 1791827752);
+    this.teamSheetIds.set("doc", 1387892873);
+    this.teamSheetIds.set("editors", 147601621);
+    this.teamSheetIds.set("hosted-che", 602575269);
+    this.teamSheetIds.set("platform", 615179376);
+    this.teamSheetIds.set("plugins", 620995623);
+    this.teamSheetIds.set("pm", 500634577);
+    this.teamSheetIds.set("qe", 287072407);
+    this.teamSheetIds.set("productization", 52078153);
+  }
+
+  public notifyStart() : void {
+    this.notifySheet(this.teamSheetIds.get("controller")!, 'start');
+  }
+
+  public notifyEnd() : void {
+    this.notifySheet(this.teamSheetIds.get("controller")!, 'stop');
+  }
+
+  protected async notifySheet(sheetId: number, state: 'start' | 'stop') {
+    let rowHeight;
+    let backgroundColor;
+    if (state === 'start') {
+      rowHeight = 120;
+      backgroundColor = {
+        red: 1.0,
+        green: 0.0,
+        blue: 0.0
+      }
+    } else {
+      rowHeight = 3;
+      backgroundColor = {
+        red: 0.0,
+        green: 1.0,
+        blue: 0.0
+      }
+    }
+
+    const requests = [];
+    const sizeRequest =
+    {
+      updateDimensionProperties: {
+        range: {
+          sheetId: sheetId,
+          dimension: 'ROWS',
+          startIndex: 1,
+          endIndex: 2
+        },
+        properties: {
+          pixelSize: rowHeight
+        },
+        fields: 'pixelSize'
+      }
+    }
+    requests.push(sizeRequest);
+    const colorRequest =
+    {
+      repeatCell: {
+        range: {
+          sheetId: sheetId,
+          startRowIndex: 1,
+          endRowIndex: 2
+        },
+        cell: {
+          userEnteredFormat: {
+            backgroundColor: backgroundColor
+          }
+        },
+        "fields": "userEnteredFormat(backgroundColor)"
+      }
+    }
+
+    requests.push(colorRequest);
+    await this.googleSheet.batchUpdateOneOfRangeRequests(requests);
   }
 
   public async import(): Promise<void> {
@@ -28,27 +107,15 @@ export class TeamBacklogGenerator {
     // get mapping between issue link and row index
     const backlogIssueMappingIndex: Map<string, number> = new Map(backlogRows.map((row: any, index: number) => [row[backlogLinkColumn], index]));
 
-    const teamSheetIds: Map<string, number> = new Map();
+    
 
-    teamSheetIds.set("controller", 559612723);
-    teamSheetIds.set("deploy", 299792844);
-    teamSheetIds.set("devex", 1791827752);
-    teamSheetIds.set("doc", 1387892873);
-    teamSheetIds.set("editors", 147601621);
-    teamSheetIds.set("hosted-che", 602575269);
-    teamSheetIds.set("platform", 615179376);
-    teamSheetIds.set("plugins", 620995623);
-    teamSheetIds.set("pm", 500634577);
-    teamSheetIds.set("qe", 287072407);
-    teamSheetIds.set("productization", 52078153);
-
-    await Promise.all(Array.from(teamSheetIds.keys()).map(async (teamName) => {
+    await Promise.all(Array.from(this.teamSheetIds.keys()).map(async (teamName) => {
 
       const insertRows: string[][] = [];
       const batchUpdates: any[] = [];
 
       // now, get all issues of controller sheet
-      const sheetId = teamSheetIds.get(teamName)!;
+      const sheetId = this.teamSheetIds.get(teamName)!;
       const teamSheetName = `${teamName}-backlog`;
       const teamSheetData = await this.googleSheet.getData({ range: `${teamSheetName}!A1:Z` });
       const teamBacklogRows = teamSheetData.values;

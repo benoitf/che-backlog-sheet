@@ -33,6 +33,9 @@ const init = async function() {
   const header = await googleSheet.getHeader(GoogleSheet.SHEET_NAME);
   const rowUpdater = new RowUpdater(header);
 
+  const teamBacklogGenerator = new TeamBacklogGenerator(googleSheet, rowUpdater)
+  await teamBacklogGenerator.notifyStart();
+
   // now, perform the github import
   await new GithubImport(githubRead, googleSheet, rowUpdater).import();
   await new JiraImport(jiraToken, googleSheet, rowUpdater).import();
@@ -42,7 +45,8 @@ const init = async function() {
   await updateValidation.update();
 
   // generate sheet data for each team
-  await new TeamBacklogGenerator(googleSheet, rowUpdater).import();
+  await teamBacklogGenerator.import();
+  await teamBacklogGenerator.notifyEnd();
 
 };
 
