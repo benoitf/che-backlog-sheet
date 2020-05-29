@@ -25,6 +25,11 @@ export class JiraImport {
       },
     });
 
+    await this.importCRW(jira);
+    await this.importCRT(jira);
+  }
+
+  protected async importCRW(jira: any) : Promise<void> {
     const mergedIssues: any = [];
     // first import
     // const jql = 'project=CRW AND status not in (closed, resolved)';
@@ -40,8 +45,42 @@ export class JiraImport {
     }
 
     await this.handleIssues(mergedIssues);
-
   }
+
+  protected async importCRT(jira: any) : Promise<void> {
+    const mergedIssues: any = [];
+    // first import
+    // const jql = "project = CRT and labels in ('cheteam') and labels not in ('WIP') AND status not in (closed, resolved)";
+    // update
+    const jql = "project = CRT and labels in ('cheteam') and labels not in ('WIP') AND updated>=-1D";
+    const data = await jira.search.search({ jql, maxResults: 0 });
+    const total = data.total;
+    let nbRead = 0;
+    while (nbRead < total) {
+      const partialData = await jira.search.search({ jql, maxResults: 10, startAt: nbRead });
+      nbRead = nbRead + 10;
+      mergedIssues.push(...partialData.issues);
+    }
+
+
+
+    // update to include team to be hosted-che
+    const updatedIssues = mergedIssues.map((issueData: any) => {
+      let components = issueData.fields.components;
+      const hostedCheComponent = {name: 'area/hosted-che' };
+      if (!components) {
+        issueData.fields.components = [hostedCheComponent];
+      } else {
+        issueData.fields.components.push(hostedCheComponent);
+      }
+      return issueData;
+    });
+
+
+    await this.handleIssues(updatedIssues);
+  }
+
+
 
   public async handleIssues(jiraIssueData: any): Promise<void> {
 
@@ -188,6 +227,7 @@ export class JiraImport {
     areasTeams.set("productization: build & internals", "productization");
     areasTeams.set("productization: security & legal", "productization");
     areasTeams.set("testing", "qe");
+    areasTeams.set("area/hosted-che", "hosted-che");
     
 
     const matchingTeams: string[] = [];
