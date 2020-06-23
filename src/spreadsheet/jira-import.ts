@@ -27,6 +27,7 @@ export class JiraImport {
 
     await this.importCRW(jira);
     await this.importCRT(jira);
+    await this.importWTO(jira);
   }
 
   protected async importCRW(jira: any) : Promise<void> {
@@ -34,7 +35,7 @@ export class JiraImport {
     // first import
     // const jql = 'project=CRW AND status not in (closed, resolved)';
     // update
-    const jql = "project=CRW AND updated>=-1D";
+    const jql = "project=CRW AND updated>=-10D";
     const data = await jira.search.search({ jql, maxResults: 0 });
     const total = data.total;
     let nbRead = 0;
@@ -72,6 +73,40 @@ export class JiraImport {
         issueData.fields.components = [hostedCheComponent];
       } else {
         issueData.fields.components.push(hostedCheComponent);
+      }
+      return issueData;
+    });
+
+
+    await this.handleIssues(updatedIssues);
+  }
+
+
+  protected async importWTO(jira: any) : Promise<void> {
+    const mergedIssues: any = [];
+    // first import
+    // const jql = "project = WTO and labels in ('cheteam') and labels not in ('WIP') AND status not in (closed, resolved)";
+    // update
+    const jql = "project = WTO AND updated>=-1D";
+    const data = await jira.search.search({ jql, maxResults: 0 });
+    const total = data.total;
+    let nbRead = 0;
+    while (nbRead < total) {
+      const partialData = await jira.search.search({ jql, maxResults: 10, startAt: nbRead });
+      nbRead = nbRead + 10;
+      mergedIssues.push(...partialData.issues);
+    }
+
+
+
+    // update to include team to be hosted-che
+    const updatedIssues = mergedIssues.map((issueData: any) => {
+      let components = issueData.fields.components;
+      const controllerComponent = {name: 'area/cloudshell' };
+      if (!components) {
+        issueData.fields.components = [controllerComponent];
+      } else {
+        issueData.fields.components.push(controllerComponent);
       }
       return issueData;
     });
@@ -227,7 +262,9 @@ export class JiraImport {
     areasTeams.set("productization: build & internals", "productization");
     areasTeams.set("productization: security & legal", "productization");
     areasTeams.set("testing", "qe");
+    areasTeams.set("hosted che: telemetry, kubernetes-image-puller", "hosted-che");
     areasTeams.set("area/hosted-che", "hosted-che");
+    areasTeams.set("area/cloudshell", "controller");
     
 
     const matchingTeams: string[] = [];

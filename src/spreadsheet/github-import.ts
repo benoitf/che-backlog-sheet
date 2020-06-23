@@ -249,6 +249,8 @@ export class GithubImport {
     areasTeams.set("area/ts-workspace-client", "controller");
     areasTeams.set("area/workspace-client-lib", "controller");
     areasTeams.set("area/workspace-loader", "controller");
+    areasTeams.set("area/cloudshell", "controller");
+    
     
     areasTeams.set("area/debugger", "plugins");
     areasTeams.set("area/devfile-registry", "plugins");
