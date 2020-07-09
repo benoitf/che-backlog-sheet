@@ -28,6 +28,7 @@ export class JiraImport {
     await this.importCRW(jira);
     await this.importCRT(jira);
     await this.importWTO(jira);
+    await this.importRHDEVDOCS(jira);
   }
 
   protected async importCRW(jira: any) : Promise<void> {
@@ -116,6 +117,36 @@ export class JiraImport {
   }
 
 
+  protected async importRHDEVDOCS(jira: any) : Promise<void> {
+    const mergedIssues: any = [];
+    // first import
+    const jql = "project = RHDEVDOCS AND (component = 'Eclipse Che' OR component = 'CodeReady Workspaces') AND status not in (closed, resolved)";
+    // update
+    //const jql = "project = RHDEVDOCS AND (component = 'Eclipse Che' OR component = 'CodeReady Workspaces')  AND updated>=-1D";
+    const data = await jira.search.search({ jql, maxResults: 0 });
+    const total = data.total;
+    let nbRead = 0;
+    while (nbRead < total) {
+      const partialData = await jira.search.search({ jql, maxResults: 10, startAt: nbRead });
+      nbRead = nbRead + 10;
+      mergedIssues.push(...partialData.issues);
+    }
+
+    // update to include team to be hosted-che
+    const updatedIssues = mergedIssues.map((issueData: any) => {
+      let components = issueData.fields.components;
+      const docComponent = {name: 'area/doc' };
+      if (!components) {
+        issueData.fields.components = [docComponent];
+      } else {
+        issueData.fields.components.push(docComponent);
+      }
+      return issueData;
+    });
+
+
+    await this.handleIssues(updatedIssues);
+  }
 
   public async handleIssues(jiraIssueData: any): Promise<void> {
 
@@ -265,6 +296,7 @@ export class JiraImport {
     areasTeams.set("hosted che: telemetry, kubernetes-image-puller", "hosted-che");
     areasTeams.set("area/hosted-che", "hosted-che");
     areasTeams.set("area/cloudshell", "controller");
+    areasTeams.set("area/doc", "doc");
     
 
     const matchingTeams: string[] = [];
