@@ -120,9 +120,9 @@ export class JiraImport {
   protected async importRHDEVDOCS(jira: any) : Promise<void> {
     const mergedIssues: any = [];
     // first import
-    const jql = "project = RHDEVDOCS AND (component = 'Eclipse Che' OR component = 'CodeReady Workspaces') AND status not in (closed, resolved)";
+    //const jql = "project = RHDEVDOCS AND (component = 'Eclipse Che' OR component = 'CodeReady Workspaces') AND status not in (closed, resolved)";
     // update
-    //const jql = "project = RHDEVDOCS AND (component = 'Eclipse Che' OR component = 'CodeReady Workspaces')  AND updated>=-1D";
+    const jql = "project = RHDEVDOCS AND (component = 'Eclipse Che' OR component = 'CodeReady Workspaces') AND updated>=-1D";
     const data = await jira.search.search({ jql, maxResults: 0 });
     const total = data.total;
     let nbRead = 0;
