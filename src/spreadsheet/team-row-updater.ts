@@ -15,6 +15,7 @@ export class TeamRowUpdater {
   public static STATE = "State";
   public static STATUS = "Status";
   public static AREAS = "Areas";
+  public static ASSIGNEE = "Assignee";
 
   private mapping: Map<string, number>;
 
@@ -34,6 +35,7 @@ export class TeamRowUpdater {
     this.defineMapping(TeamRowUpdater.STATE);
     this.defineMapping(TeamRowUpdater.STATUS);
     this.defineMapping(TeamRowUpdater.AREAS);
+    this.defineMapping(TeamRowUpdater.ASSIGNEE);
   }
 
   public defineMapping(key: string) {
@@ -82,6 +84,9 @@ export class TeamRowUpdater {
     if (this.mapping.has(TeamRowUpdater.STATUS)) {
       buildRow[this.mapping.get(TeamRowUpdater.STATUS)!] = rawDefinition.status;
     }
+    if (this.mapping.has(TeamRowUpdater.ASSIGNEE)) {
+      buildRow[this.mapping.get(TeamRowUpdater.ASSIGNEE)!] = rawDefinition.assignee;
+    }
 
     return buildRow;
 
@@ -101,6 +106,7 @@ export class TeamRowUpdater {
       comments: row[this.mapping.get(TeamRowUpdater.COMMENTS)!],
       state: row[this.mapping.get(TeamRowUpdater.STATE)!],
       status: row[this.mapping.get(TeamRowUpdater.STATUS)!],
+      assignee: row[this.mapping.get(TeamRowUpdater.ASSIGNEE)!],
     };
   }
 

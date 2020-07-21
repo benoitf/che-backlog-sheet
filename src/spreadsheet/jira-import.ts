@@ -189,6 +189,7 @@ export class JiraImport {
         issueDef.state = this.getState(issueData);
         issueDef.status = this.getStatus(issueData);
         issueDef.milestone = this.getMilestone(issueData);
+        issueDef.assignee = this.getAssignee(issueData);
 
         // update row columns
         const update = {
@@ -210,6 +211,7 @@ export class JiraImport {
           title: this.getTitle(issueData),
           link: issueLink,
           comments: "",
+          assignee: this.getAssignee(issueData),
           state: this.getState(issueData),
 
         };
@@ -251,6 +253,13 @@ export class JiraImport {
   public getStatus(issueData: any): string {
     if (issueData.fields.status && issueData.fields.status.name) {
       return issueData.fields.status.name.toLowerCase();
+    }
+    return "";
+  }
+
+  public getAssignee(issueData: any): string {
+    if (issueData.fields.assignee && issueData.fields.assignee.name) {
+      return issueData.fields.assignee.name.toLowerCase();
     }
     return "";
   }

@@ -11,6 +11,7 @@ export interface RawDefinition {
   comments: string;
   state: string;
   labels: string;
+  assignee: string;
 }
 
 export interface TeamRawDefinition {
@@ -26,5 +27,5 @@ export interface TeamRawDefinition {
   state: string;
   status: string;
   areas: string;
-
+  assignee: string;
 }

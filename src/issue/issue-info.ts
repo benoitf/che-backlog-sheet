@@ -43,6 +43,13 @@ export class IssueInfo {
     return this.issueData.html_url;
   }
 
+  public getAssigneeLogin(): string {
+    if (this.issueData.assignee && this.issueData.assignee != null) {
+      return this.issueData.assignee.login;
+    }
+    return '';
+  }
+
   public milestone(): string {
     // milestone
     let milestone: string;

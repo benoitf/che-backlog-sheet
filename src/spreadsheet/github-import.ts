@@ -110,6 +110,7 @@ export class GithubImport {
         issueDef.state = this.getState(issueInfo);
         issueDef.milestone = this.getMilestone(issueInfo);
         issueDef.status = this.getStatus(issueInfo);
+        issueDef.assignee = this.getAssignee(issueInfo);
 
         // update row columns
         const update = {
@@ -132,6 +133,7 @@ export class GithubImport {
           title: issueInfo.title(),
           link: issueInfo.humanUrl(),
           comments: "",
+          assignee: this.getAssignee(issueInfo),
           state: this.getState(issueInfo),
 
         };
@@ -181,6 +183,10 @@ export class GithubImport {
     } else {
       return "";
     }
+  }
+
+  public getAssignee(issueInfo: IssueInfo): string {
+    return issueInfo.getAssigneeLogin();
   }
 
   public getMilestone(issueInfo: IssueInfo): string {

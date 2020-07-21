@@ -193,10 +193,11 @@ export class TeamBacklogGenerator {
           teamIssueDef.status = backlogIssueDef.status;
           teamIssueDef.assignment = "TRUE";
           teamIssueDef.areas = issueAreas;
+          teamIssueDef.assignee = backlogIssueDef.assignee;
 
           // update row columns
           const update = {
-            range: `${teamSheetName}!A${rowNumber}:L${rowNumber}`,
+            range: `${teamSheetName}!A${rowNumber}:M${rowNumber}`,
             values: [teamRowUpdater.getRow(teamIssueDef)],
           };
 
@@ -217,7 +218,7 @@ export class TeamBacklogGenerator {
             state: backlogIssueDef.state,
             status: backlogIssueDef.status,
             areas: issueAreas,
-
+            assignee: backlogIssueDef.assignee,
 
           };
 

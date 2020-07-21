@@ -13,6 +13,7 @@ export class RowUpdater {
   public static COMMENTS = "Comments";
   public static STATE = "State";
   public static LABELS = "Labels";
+  public static ASSIGNEE = "Assignee";
 
   private mapping: Map<string, number>;
 
@@ -30,7 +31,7 @@ export class RowUpdater {
     this.defineMapping(RowUpdater.COMMENTS);
     this.defineMapping(RowUpdater.STATE);
     this.defineMapping(RowUpdater.LABELS);
-
+    this.defineMapping(RowUpdater.ASSIGNEE);
   }
 
   public defineMapping(key: string) {
@@ -83,6 +84,10 @@ export class RowUpdater {
       buildRow[this.mapping.get(RowUpdater.LABELS)!] = rawDefinition.labels;
     }
 
+    if (this.mapping.has(RowUpdater.ASSIGNEE)) {
+      buildRow[this.mapping.get(RowUpdater.ASSIGNEE)!] = rawDefinition.assignee;
+    }
+
     return buildRow;
 
   }
@@ -99,6 +104,7 @@ export class RowUpdater {
       link: row[this.mapping.get(RowUpdater.LINK)!],
       comments: row[this.mapping.get(RowUpdater.COMMENTS)!],
       state: row[this.mapping.get(RowUpdater.STATE)!],
+      assignee: row[this.mapping.get(RowUpdater.ASSIGNEE)!],
       labels: row[this.mapping.get(RowUpdater.LABELS)!],
     };
   }
