@@ -28,7 +28,7 @@
     "@types/mocha": "^7.0.2",
     "@types/request": "^2.48.4",
     "chai": "^4.2.0",
-    "codecov": "^3.6.5",
+    "codecov": "^3.7.1",
     "mocha": "^7.1.2",
     "nyc": "^15.0.1",
     "ts-mockito": "^2.5.0",
