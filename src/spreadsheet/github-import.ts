@@ -111,6 +111,9 @@ export class GithubImport {
         issueDef.milestone = this.getMilestone(issueInfo);
         issueDef.status = this.getStatus(issueInfo);
         issueDef.assignee = this.getAssignee(issueInfo);
+        issueDef.created = issueInfo.getCreated();
+        issueDef.updated = issueInfo.getUpdated();
+        issueDef.closed = issueInfo.getClosed();
 
         // update row columns
         const update = {
@@ -135,6 +138,9 @@ export class GithubImport {
           comments: "",
           assignee: this.getAssignee(issueInfo),
           state: this.getState(issueInfo),
+          created: issueInfo.getCreated(),
+          updated: issueInfo.getUpdated(),
+          closed: issueInfo.getClosed(),
 
         };
 

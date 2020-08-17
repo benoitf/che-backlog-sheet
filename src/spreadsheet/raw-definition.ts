@@ -12,6 +12,9 @@ export interface RawDefinition {
   state: string;
   labels: string;
   assignee: string;
+  created: string;
+  updated: string;
+  closed: string;
 }
 
 export interface TeamRawDefinition {

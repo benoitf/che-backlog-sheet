@@ -128,12 +128,23 @@ export class IssueInfo {
     return this.issueData.state === "closed";
   }
 
-  public getCreated(): number {
-    return new Date(this.issueData.created_at).getTime();
+  public getCreated(): string {
+    const date = new Date(this.issueData.created_at).getTime();
+    return `${date}`;
   }
 
-  public getUpdated(): number {
-    return new Date(this.issueData.updated_at).getTime();
+  public getUpdated(): string {
+    const date = new Date(this.issueData.updated_at).getTime();
+    return `${date}`;
+  }
+
+  public getClosed(): string {
+    if (this.issueData.closed_at) {
+      const date = new Date(this.issueData.closed_at!).getTime();
+      return `${date}`;
+    } else {
+      return '';
+    }
   }
 
   public isOpen(): boolean {

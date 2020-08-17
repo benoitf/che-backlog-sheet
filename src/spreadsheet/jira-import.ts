@@ -36,7 +36,7 @@ export class JiraImport {
     // first import
     // const jql = 'project=CRW AND status not in (closed, resolved)';
     // update
-    const jql = "project=CRW AND updated>=-10D";
+    const jql = "project=CRW AND updated>=-1D";
     const data = await jira.search.search({ jql, maxResults: 0 });
     const total = data.total;
     let nbRead = 0;
@@ -190,6 +190,9 @@ export class JiraImport {
         issueDef.status = this.getStatus(issueData);
         issueDef.milestone = this.getMilestone(issueData);
         issueDef.assignee = this.getAssignee(issueData);
+        issueDef.created = this.getCreated(issueData);
+        issueDef.updated = this.getUpdated(issueData);
+        issueDef.closed = this.getClosed(issueData);
 
         // update row columns
         const update = {
@@ -213,6 +216,9 @@ export class JiraImport {
           comments: "",
           assignee: this.getAssignee(issueData),
           state: this.getState(issueData),
+          created : this.getCreated(issueData),
+          updated : this.getUpdated(issueData),
+          closed : this.getClosed(issueData),
 
         };
 
@@ -342,5 +348,30 @@ export class JiraImport {
       return "closed";
     }
   }
+
+  public getCreated(issueData: any): string {
+    if (issueData.fields.created) {
+      const date = new Date(issueData.fields.created).getTime();
+      return `${date}`;
+    }
+    return "";
+  }
+
+  public getUpdated(issueData: any): string {
+    if (issueData.fields.updated) {
+      const date = new Date(issueData.fields.updated).getTime();
+      return `${date}`;
+    }
+    return "";
+  }
+
+  public getClosed(issueData: any): string {
+    if (issueData.fields.resolutiondate) {
+      const date = new Date(issueData.fields.resolutiondate).getTime();
+      return `${date}`;
+    }
+    return "";
+  }
+
 
 }

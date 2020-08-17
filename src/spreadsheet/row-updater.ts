@@ -14,6 +14,9 @@ export class RowUpdater {
   public static STATE = "State";
   public static LABELS = "Labels";
   public static ASSIGNEE = "Assignee";
+  public static CREATED = "Created";
+  public static UPDATED = "Updated";
+  public static CLOSED = "Closed";
 
   private mapping: Map<string, number>;
 
@@ -32,6 +35,9 @@ export class RowUpdater {
     this.defineMapping(RowUpdater.STATE);
     this.defineMapping(RowUpdater.LABELS);
     this.defineMapping(RowUpdater.ASSIGNEE);
+    this.defineMapping(RowUpdater.CREATED);
+    this.defineMapping(RowUpdater.UPDATED);
+    this.defineMapping(RowUpdater.CLOSED);
   }
 
   public defineMapping(key: string) {
@@ -88,6 +94,16 @@ export class RowUpdater {
       buildRow[this.mapping.get(RowUpdater.ASSIGNEE)!] = rawDefinition.assignee;
     }
 
+    if (this.mapping.has(RowUpdater.CREATED)) {
+      buildRow[this.mapping.get(RowUpdater.CREATED)!] = rawDefinition.created;
+    }
+    if (this.mapping.has(RowUpdater.UPDATED)) {
+      buildRow[this.mapping.get(RowUpdater.UPDATED)!] = rawDefinition.updated;
+    }
+    if (this.mapping.has(RowUpdater.CLOSED)) {
+      buildRow[this.mapping.get(RowUpdater.CLOSED)!] = rawDefinition.closed;
+    }
+
     return buildRow;
 
   }
@@ -106,6 +122,9 @@ export class RowUpdater {
       state: row[this.mapping.get(RowUpdater.STATE)!],
       assignee: row[this.mapping.get(RowUpdater.ASSIGNEE)!],
       labels: row[this.mapping.get(RowUpdater.LABELS)!],
+      created: row[this.mapping.get(RowUpdater.CREATED)!],
+      updated: row[this.mapping.get(RowUpdater.UPDATED)!],
+      closed: row[this.mapping.get(RowUpdater.CLOSED)!],
     };
   }
 
