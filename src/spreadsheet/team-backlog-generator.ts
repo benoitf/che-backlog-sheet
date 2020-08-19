@@ -7,9 +7,9 @@ import request = require("request");
 import * as moment from 'moment';
 
 enum SortCategory {
-  CURRENT_SPRINT = 'Current Sprint (milestone or fixVersions set) / Automatically updated',
-  RECENT = 'RECENT ISSUES / LAST 3 Weeks / Automatically updated',
-  NOT_UPDATED_SINCE_5_MONTHS = 'Stale issues ( > 5 months without update) / Automatically updated',
+  CURRENT_SPRINT = 'Current Sprint (milestone or fixVersions set) / order by milestone / Automatically updated',
+  RECENT = 'RECENT ISSUES / LAST 3 Weeks (newer--> older)/ Automatically updated',
+  NOT_UPDATED_SINCE_5_MONTHS = 'Stale issues (older --> newer) ( > 5 months without update) / Automatically updated',
   NEW_NOTEWORTHY = 'New & Noteworthy / Automatically updated',
   BLOCKER = 'Blocker issues / Automatically updated',
   JIRA_CRITICAL = 'JIRA Critical issues / Automatically updated',
@@ -60,6 +60,54 @@ export class TeamBacklogGenerator {
   public notifyEnd(): void {
     this.notifySheet(this.teamSheetIds.get("controller")!, 'stop');
   }
+
+  public groupIdentifier(rawDefinition: RawDefinition): string {
+    const shortIdentifier = this.shortIdentifier(rawDefinition);
+    return shortIdentifier.split('-')[0];
+  }
+
+  public issueIdentifier(rawDefinition: RawDefinition): number {
+    const shortIdentifier = this.shortIdentifier(rawDefinition);
+    return parseInt(shortIdentifier.split('-')[1]);
+  }
+
+  public compareIdentifier(rawDefinition1: RawDefinition, rawDefinition2: RawDefinition): number {
+    const group1 = this.groupIdentifier(rawDefinition1);
+    const group2 = this.groupIdentifier(rawDefinition2);
+
+    const issueIdentifier1 = this.issueIdentifier(rawDefinition1);
+    const issueIdentifier2 = this.issueIdentifier(rawDefinition2);
+
+    if (group1 === group2) {
+      // compare issue identifier
+      if (issueIdentifier1 < issueIdentifier2) {
+        return -1
+      } else if (issueIdentifier1 == issueIdentifier2) {
+        return 0
+      } else {
+        return 1;
+      }
+    } else {
+      return group1.localeCompare(group2);
+    }
+
+  }
+
+
+  public shortIdentifier(rawDefinition: RawDefinition): string {
+    if (rawDefinition.link) {
+      if (rawDefinition.link.startsWith('https://issues.redhat.com/browse/')) {
+        return rawDefinition.link.substring('https://issues.redhat.com/browse/'.length);
+      } else if (rawDefinition.link && rawDefinition.link.startsWith('https://github.com/eclipse/che/issues/')) {
+        return `GH-${rawDefinition.link.substring('https://github.com/eclipse/che/issues/'.length)}`;
+      } else {
+        return rawDefinition.link;
+      }
+    }
+    return rawDefinition.link;
+  }
+
+
 
   protected async notifySheet(sheetId: number, state: 'start' | 'stop') {
     let rowHeight;
@@ -288,11 +336,95 @@ export class TeamBacklogGenerator {
         if (existingCategory && backlogIssueDef.state === 'open') {
           existingCategory.push(backlogIssueDef);
         }
-      })
+      });
+
+      // sort sections following different rules
+
+      // current sprint = milestone order then issue number
+      const currentSprintValues: RawDefinition[] = sortedMap.get(SortCategory.CURRENT_SPRINT)!;
+      currentSprintValues.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+
+        // sort by milestone which should be there
+        if (rawDefinition1.milestone && rawDefinition2.milestone) {
+          if (rawDefinition1.milestone === rawDefinition2.milestone) {
+            return this.compareIdentifier(rawDefinition1, rawDefinition2);
+          }
+          return rawDefinition1.milestone.localeCompare(rawDefinition2.milestone);
+        } else {
+          return this.compareIdentifier(rawDefinition1, rawDefinition2);
+        }
+      });
+
+      // current spring = milestone order then issue number
+      const recentValues: RawDefinition[] = sortedMap.get(SortCategory.RECENT)!;
+      recentValues.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+
+        // sort by milestone which should be there
+        if (rawDefinition1.created && rawDefinition2.created) {
+          if (rawDefinition1.created === rawDefinition2.created) {
+            return this.compareIdentifier(rawDefinition1, rawDefinition2);
+          }
+          // reverse order to have more recent first
+          return rawDefinition2.created.localeCompare(rawDefinition1.created);
+        } else {
+          return this.compareIdentifier(rawDefinition1, rawDefinition2);
+        }
+      });
+
+      // not updated, sort by least updated
+      sortedMap.get(SortCategory.NOT_UPDATED_SINCE_5_MONTHS)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+
+        let updated1 = rawDefinition1.created;
+        let updated2 = rawDefinition2.created;
+        if (rawDefinition1.updated) {
+          updated1 = rawDefinition1.updated;
+        }
+        if (rawDefinition2.updated) {
+          updated2 = rawDefinition2.updated;
+        }
+
+        if (updated1 && updated2) {
+          if (updated1 === updated2) {
+            return this.compareIdentifier(rawDefinition1, rawDefinition2);
+          }
+          // least updated
+          if (parseInt(updated1) < parseInt(updated2)) {
+            return -1
+          } else if (parseInt(updated1) == parseInt(updated2)) {
+            return 0
+          } else {
+            return 1;
+          }
+        } else {
+          return this.compareIdentifier(rawDefinition1, rawDefinition2);
+        }
+      });
+
+      // others = order by issue number
+      sortedMap.get(SortCategory.BLOCKER)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+        return this.compareIdentifier(rawDefinition1, rawDefinition2);
+      });
+      sortedMap.get(SortCategory.GITHUB_P1)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+        return this.compareIdentifier(rawDefinition1, rawDefinition2);
+      });
+      sortedMap.get(SortCategory.GITHUB_P2)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+        return this.compareIdentifier(rawDefinition1, rawDefinition2);
+      });
+      sortedMap.get(SortCategory.JIRA_CRITICAL)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+        return this.compareIdentifier(rawDefinition1, rawDefinition2);
+      });
+      sortedMap.get(SortCategory.JIRA_MAJOR)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+        return this.compareIdentifier(rawDefinition1, rawDefinition2);
+      });
+      sortedMap.get(SortCategory.NEW_NOTEWORTHY)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+        return this.compareIdentifier(rawDefinition1, rawDefinition2);
+      });
+      sortedMap.get(SortCategory.UNSORTED)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+        return this.compareIdentifier(rawDefinition1, rawDefinition2);
+      });
 
 
       const keys = Array.from(sortedMap.keys());
-
       const batchUpdates: any[] = [];
       const batchUpdateOneOfRangeRequests: any[] = [];
 
@@ -354,21 +486,13 @@ export class TeamBacklogGenerator {
 
 
             // prefix issue number
-            if (rawDefinition.link && rawDefinition.link.startsWith('https://issues.redhat.com/browse/')) {
-              title = `${rawDefinition.link.substring('https://issues.redhat.com/browse/'.length)}: ${title}`;
-            } else if (rawDefinition.link && rawDefinition.link.startsWith('https://github.com/eclipse/che/issues/')) {
-              title = `GH-${rawDefinition.link.substring('https://github.com/eclipse/che/issues/'.length)}: ${title}`;
-            }
+            title = `${this.shortIdentifier(rawDefinition)}: ${title}`;
 
             // add quote to not let numbers
             const milestone = `'${rawDefinition.milestone}`;
             return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, rawDefinition.assignee, this.getAreaLabels(rawDefinition.labels), rawDefinition.status, rawDefinition.link, kind, severity]
           });
           const endColumns = newValues[0].length;
-
-
-
-
 
           const backgroundColor = {
             red: 29 / 255,
@@ -420,8 +544,6 @@ export class TeamBacklogGenerator {
 
           batchUpdateOneOfRangeRequests.push(colorRequest);
           batchUpdateOneOfRangeRequests.push(mergeCellRequest);
-
-
 
           batchUpdates.push(update);
           rowNewIndex++;
