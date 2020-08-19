@@ -31,7 +31,7 @@ export class JiraImport {
     await this.importRHDEVDOCS(jira);
   }
 
-  protected async importCRW(jira: any) : Promise<void> {
+  protected async importCRW(jira: any): Promise<void> {
     const mergedIssues: any = [];
     // first import
     // const jql = 'project=CRW AND status not in (closed, resolved)';
@@ -49,7 +49,7 @@ export class JiraImport {
     await this.handleIssues(mergedIssues);
   }
 
-  protected async importCRT(jira: any) : Promise<void> {
+  protected async importCRT(jira: any): Promise<void> {
     const mergedIssues: any = [];
     // first import
     // const jql = "project = CRT and labels in ('cheteam') and labels not in ('WIP') AND status not in (closed, resolved)";
@@ -69,7 +69,7 @@ export class JiraImport {
     // update to include team to be hosted-che
     const updatedIssues = mergedIssues.map((issueData: any) => {
       let components = issueData.fields.components;
-      const hostedCheComponent = {name: 'area/hosted-che' };
+      const hostedCheComponent = { name: 'area/hosted-che' };
       if (!components) {
         issueData.fields.components = [hostedCheComponent];
       } else {
@@ -83,7 +83,7 @@ export class JiraImport {
   }
 
 
-  protected async importWTO(jira: any) : Promise<void> {
+  protected async importWTO(jira: any): Promise<void> {
     const mergedIssues: any = [];
     // first import
     // const jql = "project = WTO and labels in ('cheteam') and labels not in ('WIP') AND status not in (closed, resolved)";
@@ -103,7 +103,7 @@ export class JiraImport {
     // update to include team to be hosted-che
     const updatedIssues = mergedIssues.map((issueData: any) => {
       let components = issueData.fields.components;
-      const controllerComponent = {name: 'area/cloudshell' };
+      const controllerComponent = { name: 'area/cloudshell' };
       if (!components) {
         issueData.fields.components = [controllerComponent];
       } else {
@@ -117,7 +117,7 @@ export class JiraImport {
   }
 
 
-  protected async importRHDEVDOCS(jira: any) : Promise<void> {
+  protected async importRHDEVDOCS(jira: any): Promise<void> {
     const mergedIssues: any = [];
     // first import
     //const jql = "project = RHDEVDOCS AND (component = 'Eclipse Che' OR component = 'CodeReady Workspaces') AND status not in (closed, resolved)";
@@ -135,7 +135,7 @@ export class JiraImport {
     // update to include team to be hosted-che
     const updatedIssues = mergedIssues.map((issueData: any) => {
       let components = issueData.fields.components;
-      const docComponent = {name: 'area/doc' };
+      const docComponent = { name: 'area/doc' };
       if (!components) {
         issueData.fields.components = [docComponent];
       } else {
@@ -216,9 +216,9 @@ export class JiraImport {
           comments: "",
           assignee: this.getAssignee(issueData),
           state: this.getState(issueData),
-          created : this.getCreated(issueData),
-          updated : this.getUpdated(issueData),
-          closed : this.getClosed(issueData),
+          created: this.getCreated(issueData),
+          updated: this.getUpdated(issueData),
+          closed: this.getClosed(issueData),
 
         };
 
@@ -312,7 +312,7 @@ export class JiraImport {
     areasTeams.set("area/hosted-che", "hosted-che");
     areasTeams.set("area/cloudshell", "controller");
     areasTeams.set("area/doc", "doc");
-    
+
 
     const matchingTeams: string[] = [];
     // get areas label

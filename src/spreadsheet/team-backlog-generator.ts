@@ -8,9 +8,9 @@ import * as moment from 'moment';
 
 enum SortCategory {
   CURRENT_SPRINT = 'Current Sprint (milestone or fixVersions set) / Automatically updated',
-  RECENT= 'RECENT ISSUES / LAST 3 Weeks / Automatically updated',
+  RECENT = 'RECENT ISSUES / LAST 3 Weeks / Automatically updated',
   NOT_UPDATED_SINCE_5_MONTHS = 'Stale issues ( > 5 months without update) / Automatically updated',
-  NEW_NOTEWORTHY= 'New & Noteworthy / Automatically updated',
+  NEW_NOTEWORTHY = 'New & Noteworthy / Automatically updated',
   BLOCKER = 'Blocker issues / Automatically updated',
   JIRA_CRITICAL = 'JIRA Critical issues / Automatically updated',
   GITHUB_P1 = 'Github P1 issues / Automatically updated',
@@ -29,7 +29,7 @@ export class TeamBacklogGenerator {
     private googleSheet: GoogleSheet,
     private rowUpdater: RowUpdater,
   ) {
-    this.teamSheetIds  = new Map();
+    this.teamSheetIds = new Map();
     this.teamSheetIds.set("controller", 559612723);
     this.teamSheetIds.set("deploy", 299792844);
     this.teamSheetIds.set("devex", 1791827752);
@@ -53,11 +53,11 @@ export class TeamBacklogGenerator {
     this.prioritizationSheetIds.set("qe", 2077165771);
   }
 
-  public notifyStart() : void {
+  public notifyStart(): void {
     this.notifySheet(this.teamSheetIds.get("controller")!, 'start');
   }
 
-  public notifyEnd() : void {
+  public notifyEnd(): void {
     this.notifySheet(this.teamSheetIds.get("controller")!, 'stop');
   }
 
@@ -142,59 +142,59 @@ export class TeamBacklogGenerator {
       const teamIssues = backlogRows.filter((row: any) => (row[backlogTeamColumn] && row[backlogTeamColumn].includes(teamName)));
 
 
-    let rowNewIndex = 1;
+      let rowNewIndex = 1;
 
-    const sheetId = this.prioritizationSheetIds.get(teamName);
-    await this.googleSheet.batchUpdateOneOfRangeRequests([ {
-      repeatCell: {
-        range: {
-          sheetId: sheetId,
-        },
-        cell: {
-          userEnteredFormat: {
+      const sheetId = this.prioritizationSheetIds.get(teamName);
+      await this.googleSheet.batchUpdateOneOfRangeRequests([{
+        repeatCell: {
+          range: {
+            sheetId: sheetId,
+          },
+          cell: {
+            userEnteredFormat: {
+            }
+          },
+          "fields": "userEnteredFormat"
+        }
+      },
+      {
+        unmergeCells: {
+          range: {
+            sheetId: sheetId,
           }
-        },
-        "fields": "userEnteredFormat"
-      }
-    },
-    {
-      unmergeCells: {
-        range: {
-          sheetId: sheetId,
+        }
+      },
+      {
+        updateCells: {
+          range: {
+            sheetId: sheetId
+          },
+          fields: "*"
         }
       }
-    },
-    {
-    updateCells: {
-      range: {
-        sheetId: sheetId
-      },
-      fields: "*"
-    }
-  }
 
-  
-  ]);
+
+      ]);
 
       // initialize map
-      const sortedMap : Map<SortCategory, RawDefinition[]> = new Map();
+      const sortedMap: Map<SortCategory, RawDefinition[]> = new Map();
       for (let entry in SortCategory) {
         sortedMap.set((SortCategory as any)[entry] as SortCategory, []);
-     }
-        teamIssues.forEach((row: any) => {
+      }
+      teamIssues.forEach((row: any) => {
         const backLogIssueLink = row[backlogLinkColumn];
         const backlogIssueDef: RawDefinition = this.rowUpdater.getDefinition(row);
 
-       const filters : Array<(backlogIssueDef: RawDefinition) => SortCategory | undefined> = [];
+        const filters: Array<(backlogIssueDef: RawDefinition) => SortCategory | undefined> = [];
 
-       const currentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined  => {
-        if (backlogIssueDef.milestone) {
+        const currentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+          if (backlogIssueDef.milestone) {
             return SortCategory.CURRENT_SPRINT;
           }
-         return undefined;
-      }
-      
-      const recentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined  => {
+          return undefined;
+        }
+
+        const recentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           if (backlogIssueDef.created) {
             const now = moment.utc();
             const timestamp = parseInt(backlogIssueDef.created);
@@ -203,23 +203,23 @@ export class TeamBacklogGenerator {
             if (duration.asDays() < 21) {
               return SortCategory.RECENT;
             }
-           }
-           return undefined;
+          }
+          return undefined;
         }
 
         const newNoteworthyFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           if (backlogIssueDef.labels && backlogIssueDef.labels.includes('new&noteworthy')) {
-              return SortCategory.NEW_NOTEWORTHY;
+            return SortCategory.NEW_NOTEWORTHY;
           }
-           return undefined;
+          return undefined;
         }
 
 
         const severityCheck = (backlogIssueDef: RawDefinition, severity: string): boolean => {
           if (backlogIssueDef.severity && backlogIssueDef.severity.toLowerCase() === severity) {
             return true;
-         }
-         return false;
+          }
+          return false;
         }
         const blockerFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           return severityCheck(backlogIssueDef, 'blocker') ? SortCategory.BLOCKER : undefined
@@ -239,27 +239,27 @@ export class TeamBacklogGenerator {
         }
 
 
-      const notUpdatedSince4Months = (backlogIssueDef: RawDefinition): SortCategory | undefined  => {
-        let lastUpdated;
-        if (backlogIssueDef.created) {
-          lastUpdated = backlogIssueDef.created;
-        }
-        if (backlogIssueDef.updated) {
-          lastUpdated = backlogIssueDef.updated;
+        const notUpdatedSince4Months = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+          let lastUpdated;
+          if (backlogIssueDef.created) {
+            lastUpdated = backlogIssueDef.created;
+          }
+          if (backlogIssueDef.updated) {
+            lastUpdated = backlogIssueDef.updated;
+          }
+
+          if (lastUpdated) {
+            const now = moment.utc();
+            const timestamp = parseInt(lastUpdated);
+            const lastUpdate = moment(timestamp);
+            const duration = moment.duration(now.diff(lastUpdate));
+            if (duration.asDays() > 150) {
+              return SortCategory.NOT_UPDATED_SINCE_5_MONTHS;
+            }
+          }
+          return undefined;
         }
 
-        if (lastUpdated) {
-          const now = moment.utc();
-          const timestamp = parseInt(lastUpdated);
-          const lastUpdate = moment(timestamp);
-          const duration = moment.duration(now.diff(lastUpdate));
-          if (duration.asDays() > 150) {
-            return SortCategory.NOT_UPDATED_SINCE_5_MONTHS;
-          }
-         }
-         return undefined;
-      }
-        
         // sort filters from priority to bottom
         filters.push(currentFilter);
         filters.push(recentFilter);
@@ -270,9 +270,9 @@ export class TeamBacklogGenerator {
         filters.push(githubP1Filter);
         filters.push(jiraMajorFilter);
         filters.push(githubP2Filter);
-        
-          let category: SortCategory | undefined;
-          let index = 0;
+
+        let category: SortCategory | undefined;
+        let index = 0;
 
         while (!category && index < filters.length) {
           category = filters[index](backlogIssueDef);
@@ -294,197 +294,197 @@ export class TeamBacklogGenerator {
       const keys = Array.from(sortedMap.keys());
 
       const batchUpdates: any[] = [];
-      const batchUpdateOneOfRangeRequests : any[] = [];
+      const batchUpdateOneOfRangeRequests: any[] = [];
 
       const teamSheetName = `${teamName}-prio`;
-     
+
       keys.forEach(key => {
         const title = `${key.toUpperCase()}`;
 
-       const values = sortedMap.get(key)!;
-       if (values.length > 0) {
-        // insert title
-        const update = {
-          range: `${teamSheetName}!A${rowNewIndex}:A${rowNewIndex}`,
-          values: [[title]],
-        };
+        const values = sortedMap.get(key)!;
+        if (values.length > 0) {
+          // insert title
+          const update = {
+            range: `${teamSheetName}!A${rowNewIndex}:A${rowNewIndex}`,
+            values: [[title]],
+          };
 
 
-        const newValues =  values.map(rawDefinition => {
-          // replace double quotes by simple quotes
-          let title = rawDefinition.title.replace(/"/g, '\'');
+          const newValues = values.map(rawDefinition => {
+            // replace double quotes by simple quotes
+            let title = rawDefinition.title.replace(/"/g, '\'');
 
-          const kind = rawDefinition.kind;
-          let prefix = '';
+            const kind = rawDefinition.kind;
+            let prefix = '';
 
-          const severity = rawDefinition.severity;
-          if (severity) {
-            if (severity.toLowerCase() === 'blocker') {
-              prefix += `🚫 `;
-            } else if (severity.toLowerCase() === 'p1' || severity.toLowerCase() === 'critical') {
-              prefix += `🔺 `;
-            } else if (severity.toLowerCase() === 'p2' || severity.toLowerCase() === 'major') {
-              prefix += `⬆  `;
-            } else {
-              prefix += `     `;
-            }
-          } else {
-            prefix += `     `;
-          }
-
-          if (kind) {
-            if (kind.toLowerCase() === 'epic') {
-              prefix += `✨ `;
-            } else if (kind.toLowerCase() === 'bug') {
-              prefix += `🐞 `;
-            } else if (kind.toLowerCase() === 'question') {
-              prefix += `🤔 `;
-            } else if (kind.toLowerCase() === 'enhancement' || kind.toLowerCase() === 'feature-request') {
-              prefix += `💡 `;
-            } else if (kind.toLowerCase() === 'task') {
-              prefix += `🔧 `;
-            } else if (kind.toLowerCase() === 'release') {
-              prefix += `📦 `;
-            } else {
-              prefix += `     `;
-            }
-          } else {
-            prefix += `     `;
-          }
-
-
-          // prefix issue number
-          if (rawDefinition.link && rawDefinition.link.startsWith('https://issues.redhat.com/browse/')) {
-            title = `${rawDefinition.link.substring('https://issues.redhat.com/browse/'.length)}: ${title}`;
-          } else if (rawDefinition.link && rawDefinition.link.startsWith('https://github.com/eclipse/che/issues/')) {
-            title = `GH-${rawDefinition.link.substring('https://github.com/eclipse/che/issues/'.length)}: ${title}`;
-          }
-
-          // add quote to not let numbers
-          const milestone = `'${rawDefinition.milestone}`;
-          return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, rawDefinition.assignee,  this.getAreaLabels(rawDefinition.labels), rawDefinition.status, rawDefinition.link, kind, severity]
-        });
-        const endColumns = newValues[0].length;
-
-
-
-
-
-        const backgroundColor = {
-          red: 29/255,
-          green: 35/255,
-          blue: 132/255
-        }
-        const textFormat = {
-          "foregroundColor": {
-            "red": 1.0,
-            "green": 1.0,
-            "blue": 1.0
-          },
-          "fontSize": 10,
-          "bold": true
-        }
-
-        const colorRequest =
-        {
-          repeatCell: {
-            range: {
-              sheetId: sheetId,
-              startRowIndex: rowNewIndex - 1,
-              endRowIndex: rowNewIndex,
-              startColumnIndex: 0,
-              endColumnIndex: endColumns
-            },
-            cell: {
-              userEnteredFormat: {
-                backgroundColor: backgroundColor,
-                textFormat: textFormat
+            const severity = rawDefinition.severity;
+            if (severity) {
+              if (severity.toLowerCase() === 'blocker') {
+                prefix += `🚫 `;
+              } else if (severity.toLowerCase() === 'p1' || severity.toLowerCase() === 'critical') {
+                prefix += `🔺 `;
+              } else if (severity.toLowerCase() === 'p2' || severity.toLowerCase() === 'major') {
+                prefix += `⬆  `;
+              } else {
+                prefix += `     `;
               }
-            },
-            "fields": "userEnteredFormat(backgroundColor, textFormat)"
+            } else {
+              prefix += `     `;
+            }
+
+            if (kind) {
+              if (kind.toLowerCase() === 'epic') {
+                prefix += `✨ `;
+              } else if (kind.toLowerCase() === 'bug') {
+                prefix += `🐞 `;
+              } else if (kind.toLowerCase() === 'question') {
+                prefix += `🤔 `;
+              } else if (kind.toLowerCase() === 'enhancement' || kind.toLowerCase() === 'feature-request') {
+                prefix += `💡 `;
+              } else if (kind.toLowerCase() === 'task') {
+                prefix += `🔧 `;
+              } else if (kind.toLowerCase() === 'release') {
+                prefix += `📦 `;
+              } else {
+                prefix += `     `;
+              }
+            } else {
+              prefix += `     `;
+            }
+
+
+            // prefix issue number
+            if (rawDefinition.link && rawDefinition.link.startsWith('https://issues.redhat.com/browse/')) {
+              title = `${rawDefinition.link.substring('https://issues.redhat.com/browse/'.length)}: ${title}`;
+            } else if (rawDefinition.link && rawDefinition.link.startsWith('https://github.com/eclipse/che/issues/')) {
+              title = `GH-${rawDefinition.link.substring('https://github.com/eclipse/che/issues/'.length)}: ${title}`;
+            }
+
+            // add quote to not let numbers
+            const milestone = `'${rawDefinition.milestone}`;
+            return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, rawDefinition.assignee, this.getAreaLabels(rawDefinition.labels), rawDefinition.status, rawDefinition.link, kind, severity]
+          });
+          const endColumns = newValues[0].length;
+
+
+
+
+
+          const backgroundColor = {
+            red: 29 / 255,
+            green: 35 / 255,
+            blue: 132 / 255
           }
-        }
-        const mergeCellRequest = 
-        {
-          mergeCells: {
-            range: {
-              sheetId: sheetId,
-              startRowIndex: rowNewIndex - 1,
-              endRowIndex: rowNewIndex,
-              startColumnIndex: 0,
-              endColumnIndex: endColumns
+          const textFormat = {
+            "foregroundColor": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0
             },
-            mergeType: "MERGE_ALL"
+            "fontSize": 10,
+            "bold": true
           }
-        }
 
-        batchUpdateOneOfRangeRequests.push(colorRequest);
-        batchUpdateOneOfRangeRequests.push(mergeCellRequest);
+          const colorRequest =
+          {
+            repeatCell: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: rowNewIndex - 1,
+                endRowIndex: rowNewIndex,
+                startColumnIndex: 0,
+                endColumnIndex: endColumns
+              },
+              cell: {
+                userEnteredFormat: {
+                  backgroundColor: backgroundColor,
+                  textFormat: textFormat
+                }
+              },
+              "fields": "userEnteredFormat(backgroundColor, textFormat)"
+            }
+          }
+          const mergeCellRequest =
+          {
+            mergeCells: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: rowNewIndex - 1,
+                endRowIndex: rowNewIndex,
+                startColumnIndex: 0,
+                endColumnIndex: endColumns
+              },
+              mergeType: "MERGE_ALL"
+            }
+          }
+
+          batchUpdateOneOfRangeRequests.push(colorRequest);
+          batchUpdateOneOfRangeRequests.push(mergeCellRequest);
 
 
 
-        batchUpdates.push(update);
-        rowNewIndex++;
+          batchUpdates.push(update);
+          rowNewIndex++;
 
 
-        const valuesUpdate = {
-          range: `${teamSheetName}!A${rowNewIndex}:H${rowNewIndex + values.length}`,
-          values:newValues,
-        };
-        batchUpdates.push(valuesUpdate);
+          const valuesUpdate = {
+            range: `${teamSheetName}!A${rowNewIndex}:H${rowNewIndex + values.length}`,
+            values: newValues,
+          };
+          batchUpdates.push(valuesUpdate);
 
 
-        const style = {
-          style: "SOLID_THICK",
-          width: 1,
-          color: {
-            red: 0.0,
-            green: 0.0,
-            blue: 0.0
-          },
-        }
-        const cellBorderRequest = {
-          updateBorders: {
-            range: {
-              sheetId: sheetId,
-              startRowIndex: rowNewIndex - 2, // -2 to include title
-              endRowIndex: rowNewIndex + values.length - 1,
-              startColumnIndex: 0,
-              endColumnIndex: endColumns
+          const style = {
+            style: "SOLID_THICK",
+            width: 1,
+            color: {
+              red: 0.0,
+              green: 0.0,
+              blue: 0.0
             },
-            top: style,
-            bottom: style,
-            left: style,
-            right: style
-
           }
+          const cellBorderRequest = {
+            updateBorders: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: rowNewIndex - 2, // -2 to include title
+                endRowIndex: rowNewIndex + values.length - 1,
+                startColumnIndex: 0,
+                endColumnIndex: endColumns
+              },
+              top: style,
+              bottom: style,
+              left: style,
+              right: style
+
+            }
+          }
+          batchUpdateOneOfRangeRequests.push(cellBorderRequest);
+
+          rowNewIndex = rowNewIndex + values.length;
+
+          // empty line separator
+          const emptyLineUpdate = {
+            range: `${teamSheetName}!A${rowNewIndex}:C${rowNewIndex + 1}`,
+            values: [['   ', '', '']],
+          };
+          batchUpdates.push(emptyLineUpdate);
+          rowNewIndex++;
+
+
         }
-        batchUpdateOneOfRangeRequests.push(cellBorderRequest);
-
-        rowNewIndex = rowNewIndex + values.length;
-
-        // empty line separator
-        const emptyLineUpdate = {
-          range: `${teamSheetName}!A${rowNewIndex}:C${rowNewIndex + 1}`,
-          values:[['   ', '', '']],
-        };
-        batchUpdates.push(emptyLineUpdate);
-        rowNewIndex++;
-
-
-      }
 
       });
 
-            // update
-            if (batchUpdates.length > 0) {
-              await this.googleSheet.valuesBatchUpdate(batchUpdates);
-            }
+      // update
+      if (batchUpdates.length > 0) {
+        await this.googleSheet.valuesBatchUpdate(batchUpdates);
+      }
 
-            if (batchUpdateOneOfRangeRequests.length > 0) {
-              await this.googleSheet.batchUpdateOneOfRangeRequests(batchUpdateOneOfRangeRequests);
-            }
-            
+      if (batchUpdateOneOfRangeRequests.length > 0) {
+        await this.googleSheet.batchUpdateOneOfRangeRequests(batchUpdateOneOfRangeRequests);
+      }
+
 
     })));
 
@@ -629,7 +629,7 @@ export class TeamBacklogGenerator {
 
   getAreaLabels(labelLine: string): string {
     if (labelLine && labelLine.length > 0) {
-      const labels : string[] = [];
+      const labels: string[] = [];
       const originLabels = labelLine.split(',');
       originLabels.forEach(originLabel => {
         originLabel.split('\n').forEach(item => labels.push(item));

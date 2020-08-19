@@ -59,7 +59,7 @@ export class GithubImport {
     // update to include team to be hosted-che
     const updatedIssues = response.map((issueData: any) => {
       let labels = issueData.labels;
-      const hostedCheLabel = {name: 'area/hosted-che' };
+      const hostedCheLabel = { name: 'area/hosted-che' };
       if (!labels) {
         issueData.labels = [hostedCheLabel];
       } else {
@@ -69,7 +69,7 @@ export class GithubImport {
     });
     await this.handleIssues(updatedIssues);
 
-  }  
+  }
 
   public async handleIssues(issueData: any): Promise<void> {
     const githubIssuesInfos: IssueInfo[] = issueData.map((issueData: any) => new IssueInfo(issueData, "che"));
@@ -262,8 +262,8 @@ export class GithubImport {
     areasTeams.set("area/workspace-client-lib", "controller");
     areasTeams.set("area/workspace-loader", "controller");
     areasTeams.set("area/cloudshell", "controller");
-    
-    
+
+
     areasTeams.set("area/debugger", "plugins");
     areasTeams.set("area/devfile-registry", "plugins");
     areasTeams.set("area/languages", "plugins");
