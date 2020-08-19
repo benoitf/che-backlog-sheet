@@ -85,7 +85,7 @@ export class TeamBacklogGenerator {
     {
       updateDimensionProperties: {
         range: {
-          sheetId: sheetId,
+          sheetId,
           dimension: 'ROWS',
           startIndex: 1,
           endIndex: 2
@@ -101,13 +101,13 @@ export class TeamBacklogGenerator {
     {
       repeatCell: {
         range: {
-          sheetId: sheetId,
+          sheetId,
           startRowIndex: 1,
           endRowIndex: 2
         },
         cell: {
           userEnteredFormat: {
-            backgroundColor: backgroundColor
+            backgroundColor
           }
         },
         "fields": "userEnteredFormat(backgroundColor)"
@@ -148,7 +148,7 @@ export class TeamBacklogGenerator {
       await this.googleSheet.batchUpdateOneOfRangeRequests([{
         repeatCell: {
           range: {
-            sheetId: sheetId,
+            sheetId,
           },
           cell: {
             userEnteredFormat: {
@@ -160,14 +160,14 @@ export class TeamBacklogGenerator {
       {
         unmergeCells: {
           range: {
-            sheetId: sheetId,
+            sheetId,
           }
         }
       },
       {
         updateCells: {
           range: {
-            sheetId: sheetId
+            sheetId
           },
           fields: "*"
         }
@@ -178,14 +178,14 @@ export class TeamBacklogGenerator {
 
       // initialize map
       const sortedMap: Map<SortCategory, RawDefinition[]> = new Map();
-      for (let entry in SortCategory) {
+      for (const entry in SortCategory) {
         sortedMap.set((SortCategory as any)[entry] as SortCategory, []);
       }
       teamIssues.forEach((row: any) => {
         const backLogIssueLink = row[backlogLinkColumn];
         const backlogIssueDef: RawDefinition = this.rowUpdater.getDefinition(row);
 
-        const filters: Array<(backlogIssueDef: RawDefinition) => SortCategory | undefined> = [];
+        const filters: ((backlogIssueDef: RawDefinition) => SortCategory | undefined)[] = [];
 
         const currentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           if (backlogIssueDef.milestone) {
@@ -389,7 +389,7 @@ export class TeamBacklogGenerator {
           {
             repeatCell: {
               range: {
-                sheetId: sheetId,
+                sheetId,
                 startRowIndex: rowNewIndex - 1,
                 endRowIndex: rowNewIndex,
                 startColumnIndex: 0,
@@ -397,8 +397,8 @@ export class TeamBacklogGenerator {
               },
               cell: {
                 userEnteredFormat: {
-                  backgroundColor: backgroundColor,
-                  textFormat: textFormat
+                  backgroundColor,
+                  textFormat
                 }
               },
               "fields": "userEnteredFormat(backgroundColor, textFormat)"
@@ -408,7 +408,7 @@ export class TeamBacklogGenerator {
           {
             mergeCells: {
               range: {
-                sheetId: sheetId,
+                sheetId,
                 startRowIndex: rowNewIndex - 1,
                 endRowIndex: rowNewIndex,
                 startColumnIndex: 0,
@@ -446,7 +446,7 @@ export class TeamBacklogGenerator {
           const cellBorderRequest = {
             updateBorders: {
               range: {
-                sheetId: sheetId,
+                sheetId,
                 startRowIndex: rowNewIndex - 2, // -2 to include title
                 endRowIndex: rowNewIndex + values.length - 1,
                 startColumnIndex: 0,

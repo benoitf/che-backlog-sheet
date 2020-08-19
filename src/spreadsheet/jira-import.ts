@@ -3,7 +3,7 @@ import { Authentication } from "./authentication";
 import { GoogleSheet } from "./google-sheet";
 import { RawDefinition } from "./raw-definition";
 import { RowUpdater } from "./row-updater";
-let JiraClient = require("jira-connector");
+const JiraClient = require("jira-connector");
 /**
  * Manage the import from JIRA
  */
@@ -18,7 +18,7 @@ export class JiraImport {
 
   public async import(): Promise<void> {
 
-    let jira = new JiraClient({
+    const jira = new JiraClient({
       host: "issues.redhat.com",
       basic_auth: {
         base64: this.token,
@@ -68,7 +68,7 @@ export class JiraImport {
 
     // update to include team to be hosted-che
     const updatedIssues = mergedIssues.map((issueData: any) => {
-      let components = issueData.fields.components;
+      const components = issueData.fields.components;
       const hostedCheComponent = { name: 'area/hosted-che' };
       if (!components) {
         issueData.fields.components = [hostedCheComponent];
@@ -102,7 +102,7 @@ export class JiraImport {
 
     // update to include team to be hosted-che
     const updatedIssues = mergedIssues.map((issueData: any) => {
-      let components = issueData.fields.components;
+      const components = issueData.fields.components;
       const controllerComponent = { name: 'area/cloudshell' };
       if (!components) {
         issueData.fields.components = [controllerComponent];
@@ -120,7 +120,7 @@ export class JiraImport {
   protected async importRHDEVDOCS(jira: any): Promise<void> {
     const mergedIssues: any = [];
     // first import
-    //const jql = "project = RHDEVDOCS AND (component = 'Eclipse Che' OR component = 'CodeReady Workspaces') AND status not in (closed, resolved)";
+    // const jql = "project = RHDEVDOCS AND (component = 'Eclipse Che' OR component = 'CodeReady Workspaces') AND status not in (closed, resolved)";
     // update
     const jql = "project = RHDEVDOCS AND (component = 'Eclipse Che' OR component = 'CodeReady Workspaces') AND updated>=-1D";
     const data = await jira.search.search({ jql, maxResults: 0 });
@@ -134,7 +134,7 @@ export class JiraImport {
 
     // update to include team to be hosted-che
     const updatedIssues = mergedIssues.map((issueData: any) => {
-      let components = issueData.fields.components;
+      const components = issueData.fields.components;
       const docComponent = { name: 'area/doc' };
       if (!components) {
         issueData.fields.components = [docComponent];
@@ -273,7 +273,7 @@ export class JiraImport {
   public getMilestone(issueData: any): string {
     if (issueData.fields.fixVersions) {
       const versions = issueData.fields.fixVersions;
-      let milestones: string[] = [];
+      const milestones: string[] = [];
       if (versions.length > 0) {
         versions.forEach((version: any) => {
           milestones.push(version.name)

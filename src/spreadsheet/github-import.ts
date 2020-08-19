@@ -58,7 +58,7 @@ export class GithubImport {
 
     // update to include team to be hosted-che
     const updatedIssues = response.map((issueData: any) => {
-      let labels = issueData.labels;
+      const labels = issueData.labels;
       const hostedCheLabel = { name: 'area/hosted-che' };
       if (!labels) {
         issueData.labels = [hostedCheLabel];
