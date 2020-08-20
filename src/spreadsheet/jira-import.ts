@@ -41,6 +41,7 @@ export class JiraImport {
     const total = data.total;
     let nbRead = 0;
     while (nbRead < total) {
+      // no expand changelog there as CRW should not have previous external issues
       const partialData = await jira.search.search({ jql, maxResults: 10, startAt: nbRead });
       nbRead = nbRead + 10;
       mergedIssues.push(...partialData.issues);
@@ -59,7 +60,7 @@ export class JiraImport {
     const total = data.total;
     let nbRead = 0;
     while (nbRead < total) {
-      const partialData = await jira.search.search({ jql, maxResults: 10, startAt: nbRead });
+      const partialData = await jira.search.search({ jql, maxResults: 10, startAt: nbRead, expand: ['changelog'] });
       nbRead = nbRead + 10;
       mergedIssues.push(...partialData.issues);
     }
@@ -93,7 +94,7 @@ export class JiraImport {
     const total = data.total;
     let nbRead = 0;
     while (nbRead < total) {
-      const partialData = await jira.search.search({ jql, maxResults: 10, startAt: nbRead });
+      const partialData = await jira.search.search({ jql, maxResults: 10, startAt: nbRead, expand: ['changelog'] });
       nbRead = nbRead + 10;
       mergedIssues.push(...partialData.issues);
     }
@@ -127,7 +128,7 @@ export class JiraImport {
     const total = data.total;
     let nbRead = 0;
     while (nbRead < total) {
-      const partialData = await jira.search.search({ jql, maxResults: 10, startAt: nbRead });
+      const partialData = await jira.search.search({ jql, maxResults: 10, startAt: nbRead, expand: ['changelog'] });
       nbRead = nbRead + 10;
       mergedIssues.push(...partialData.issues);
     }
@@ -170,8 +171,30 @@ export class JiraImport {
     const batchUpdates: any[] = [];
     jiraIssueData.map(async (issueData: any) => {
 
+      const jiraKey = issueData.key;
+
       // link of the issue
-      const issueLink = "https://issues.redhat.com/browse/" + issueData.key;
+      const issueLink = `https://issues.redhat.com/browse/${jiraKey}`;
+
+      // search if it is being moved
+      const originalKey = this.getOriginalKey(jiraKey, issueData);
+      if (originalKey) {
+        // original issue has been moved
+        // needs to add moved state to this original issue
+        const oldIssueLink = `https://issues.redhat.com/browse/${originalKey}`;
+        if (issueMapping.has(oldIssueLink)) {
+          const rowNumber: number = issueMapping.get(oldIssueLink)!;
+          const rowIndex = rowNumber - 1;
+          const issueDef: RawDefinition = this.rowUpdater.getDefinition(rows[rowIndex]);
+          issueDef.state = 'moved';
+          // update row columns
+          const update = {
+            range: `${GoogleSheet.SHEET_NAME}!A${rowNumber}:U${rowNumber}`,
+            values: [this.rowUpdater.getRow(issueDef)],
+          };
+          batchUpdates.push(update);
+        }
+      }
 
       // get mapping of the issue if exists
 
@@ -282,6 +305,35 @@ export class JiraImport {
       }
     }
     return "";
+  }
+
+  public getOriginalKey(currentKey: string, issueData: any): string | undefined {
+    let key: string | undefined;
+    if (issueData.changelog) {
+      if (issueData.changelog.histories) {
+        // array of histories
+        const histories: any[] = issueData.changelog.histories;
+        histories.forEach(history => {
+          // search if issue has been moved
+          if (history.items) {
+            const items: any[] = history.items;
+            // example: 
+            // "field": "Key",
+            // "fieldtype": "jira",
+            // "from": null,
+            // "fromString": "CRW-873",
+            // "to": null,
+            // "toString": "RHDEVDOCS-1910"
+            items.forEach(item => {
+              if (item.field === 'Key' && item.fieldtype === 'jira' && item.toString === currentKey) {
+                key = item.fromString;
+              }
+          })
+          }
+       })
+      }
+    }
+    return key;
   }
 
   public getSeverity(issueData: any): string {
