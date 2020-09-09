@@ -14,7 +14,7 @@ enum SortCategory {
   CURRENT_SPRINT = '',
   NEXT_SPRINT = '',
   RECENT = 'RECENT ISSUES / LAST 3 Weeks order by priority then milestone / Automatically updated',
-  NOT_UPDATED_SINCE_5_MONTHS = 'Stale issues (older --> newer) ( > 5 months without update) / Automatically updated',
+  //NOT_UPDATED_SINCE_5_MONTHS = 'Stale issues (older --> newer) ( > 5 months without update) / Automatically updated',
   NEW_NOTEWORTHY = 'New & Noteworthy / Automatically updated',
   BLOCKER = 'Blocker issues / Automatically updated',
   JIRA_CRITICAL = 'JIRA Critical issues / Automatically updated',
@@ -390,7 +390,7 @@ export class TeamBacklogGenerator {
           return severityCheck(backlogIssueDef, 'p2') ? SortCategory.GITHUB_P2 : undefined
         }
 
-
+/*
         const notUpdatedSince4Months = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           let lastUpdated;
           if (backlogIssueDef.created) {
@@ -410,14 +410,14 @@ export class TeamBacklogGenerator {
             }
           }
           return undefined;
-        }
+        }*/
 
         // sort filters from priority to bottom
         filters.push(previousFilter);
         filters.push(currentFilter);
         filters.push(nextFilter);
         filters.push(recentFilter);
-        filters.push(notUpdatedSince4Months);
+        //filters.push(notUpdatedSince4Months);
         filters.push(newNoteworthyFilter);
         filters.push(blockerFilter);
         filters.push(jiraCriticalFilter);
@@ -492,7 +492,7 @@ export class TeamBacklogGenerator {
       });
 
       // not updated, sort by least updated
-      sortedMap.get(SortCategory.NOT_UPDATED_SINCE_5_MONTHS)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+      /*sortedMap.get(SortCategory.NOT_UPDATED_SINCE_5_MONTHS)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
 
         let updated1 = rawDefinition1.created;
         let updated2 = rawDefinition2.created;
@@ -518,7 +518,7 @@ export class TeamBacklogGenerator {
         } else {
           return this.compareIdentifier(rawDefinition1, rawDefinition2);
         }
-      });
+      });*/
 
       // others = order by issue number
       sortedMap.get(SortCategory.BLOCKER)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
@@ -607,7 +607,7 @@ export class TeamBacklogGenerator {
 
             // add quote to not let numbers
             const milestone = `'${rawDefinition.milestone}`;
-            return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, rawDefinition.assignee, this.getAreaLabels(rawDefinition.labels, ","), rawDefinition.status, rawDefinition.link, kind, severity]
+            return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, rawDefinition.assignee, this.getAreaLabels(rawDefinition.labels, ","), rawDefinition.status]
           });
           const endColumns = newValues[0].length;
 
@@ -667,7 +667,7 @@ export class TeamBacklogGenerator {
 
 
           const valuesUpdate = {
-            range: `${teamSheetName}!A${rowNewIndex}:H${rowNewIndex + values.length}`,
+            range: `${teamSheetName}!A${rowNewIndex}:E${rowNewIndex + values.length}`,
             values: newValues,
           };
           batchUpdates.push(valuesUpdate);
