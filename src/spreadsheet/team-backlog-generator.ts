@@ -5,10 +5,15 @@ import { TeamRowUpdater } from "./team-row-updater";
 import { TeamValidationUpdater } from "./team-validation-updater";
 import request = require("request");
 import * as moment from 'moment';
+import { CheVersionFetcher } from "../versions/che-version-fetcher";
+import { CrwVersionFetcher } from "../versions/crw-version-fetcher";
+import * as semver from "semver";
 
 enum SortCategory {
-  CURRENT_SPRINT = 'Current Sprint (milestone or fixVersions set) / order by milestone / Automatically updated',
-  RECENT = 'RECENT ISSUES / LAST 3 Weeks (newer--> older)/ Automatically updated',
+  PREVIOUS_SPRINT = '',
+  CURRENT_SPRINT = '',
+  NEXT_SPRINT = '',
+  RECENT = 'RECENT ISSUES / LAST 3 Weeks order by priority then milestone / Automatically updated',
   NOT_UPDATED_SINCE_5_MONTHS = 'Stale issues (older --> newer) ( > 5 months without update) / Automatically updated',
   NEW_NOTEWORTHY = 'New & Noteworthy / Automatically updated',
   BLOCKER = 'Blocker issues / Automatically updated',
@@ -69,6 +74,35 @@ export class TeamBacklogGenerator {
   public issueIdentifier(rawDefinition: RawDefinition): number {
     const shortIdentifier = this.shortIdentifier(rawDefinition);
     return parseInt(shortIdentifier.split('-')[1]);
+  }
+
+
+  public priorityNumber(rawDefinition: RawDefinition): number {
+    if (rawDefinition.severity) {
+      if (rawDefinition.severity.toLowerCase() === 'blocker') {
+        return 1000;
+      } else if (rawDefinition.severity.toLowerCase() === 'p1' || rawDefinition.severity.toLowerCase() === 'critical') {
+        return 500
+      } else if (rawDefinition.severity.toLowerCase() === 'p2' || rawDefinition.severity.toLowerCase() === 'major') {
+        return 200;
+      }
+    }
+    return 0;
+  }
+
+  public comparePriority(rawDefinition1: RawDefinition, rawDefinition2: RawDefinition): number {
+    const prio1 = this.priorityNumber(rawDefinition1);
+    const prio2 = this.priorityNumber(rawDefinition2);
+
+      // compare priority identifier
+      if (prio1 < prio2) {
+        return 1
+      } else if (prio1 == prio2) {
+        return 0
+      } else {
+        return -1;
+      }
+
   }
 
   public compareIdentifier(rawDefinition1: RawDefinition, rawDefinition2: RawDefinition): number {
@@ -223,6 +257,39 @@ export class TeamBacklogGenerator {
 
 
       ]);
+      const batchUpdates: any[] = [];
+      const batchUpdateOneOfRangeRequests: any[] = [];
+
+      const teamSheetName = `${teamName}-prio`;
+
+      const legend =  `🚫 sev/blocker, 🔺 sev/critical sev/p1, ⬆ sev/major sev/p2, ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📦 kind/release`;
+
+      const valuesUpdate = {
+        range: `${teamSheetName}!A${rowNewIndex}:A${rowNewIndex + 1}`,
+        values: [[legend]],
+      };
+      batchUpdates.push(valuesUpdate);
+      rowNewIndex = rowNewIndex + 2;
+
+      // current che milestone =
+      const cheVersionFetcher = new CheVersionFetcher();
+      await cheVersionFetcher.init();
+      const cheCurrentSprintMilestone = await cheVersionFetcher.getCurrentSprint();
+      const cheNextSprintMilestone = await cheVersionFetcher.getNextSprint();
+      const chePreviousprintMilestone = await cheVersionFetcher.getPreviousSprint();
+
+      // current CRW milestone =
+      const crwVersionFetcher = new CrwVersionFetcher();
+      await crwVersionFetcher.init();
+      const crwCurrentSprintMilestone = await crwVersionFetcher.getCurrentSprint();
+      const crwNextSprintMilestone = await crwVersionFetcher.getNextSprint();
+      const crwPreviousSprintMilestone = await crwVersionFetcher.getPreviousSprint();
+
+      // update title
+      (SortCategory as any)['PREVIOUS_SPRINT'] = `Ended Sprint (${chePreviousprintMilestone} or ${crwPreviousSprintMilestone}) / order by priority then milestone / Automatically updated`;
+      (SortCategory as any)['CURRENT_SPRINT'] = `Current Sprint (${cheCurrentSprintMilestone} or ${crwCurrentSprintMilestone}) / order by priority then milestone / Automatically updated`;
+      (SortCategory as any)['NEXT_SPRINT'] = `Candidate Sprint (${cheNextSprintMilestone} or ${crwNextSprintMilestone}) / order by priority then milestone / Automatically updated`;
+
 
       // initialize map
       const sortedMap: Map<SortCategory, RawDefinition[]> = new Map();
@@ -235,12 +302,49 @@ export class TeamBacklogGenerator {
 
         const filters: ((backlogIssueDef: RawDefinition) => SortCategory | undefined)[] = [];
 
-        const currentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
-          if (backlogIssueDef.milestone) {
-            return SortCategory.CURRENT_SPRINT;
+        const previousFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+          if (chePreviousprintMilestone) {
+            if (chePreviousprintMilestone === backlogIssueDef.milestone) {
+              return SortCategory.PREVIOUS_SPRINT;
+            }
+          }
+          if (crwPreviousSprintMilestone) {
+            if (crwPreviousSprintMilestone === backlogIssueDef.milestone) {
+              return SortCategory.PREVIOUS_SPRINT;
+            }
           }
           return undefined;
         }
+
+        const currentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+          if (cheCurrentSprintMilestone) {
+            if (cheCurrentSprintMilestone === backlogIssueDef.milestone) {
+              return SortCategory.CURRENT_SPRINT;
+            }
+          }
+          if (crwCurrentSprintMilestone) {
+            if (crwCurrentSprintMilestone === backlogIssueDef.milestone) {
+              return SortCategory.CURRENT_SPRINT;
+            }
+          }
+          return undefined;
+        }
+
+        const nextFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+          if (cheNextSprintMilestone) {
+            if (cheNextSprintMilestone === backlogIssueDef.milestone) {
+              return SortCategory.NEXT_SPRINT;
+            }
+          }
+          if (crwNextSprintMilestone) {
+            if (crwNextSprintMilestone === backlogIssueDef.milestone) {
+              return SortCategory.NEXT_SPRINT;
+            }
+          }
+          return undefined;
+        }
+
+
 
         const recentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           if (backlogIssueDef.created) {
@@ -309,7 +413,9 @@ export class TeamBacklogGenerator {
         }
 
         // sort filters from priority to bottom
+        filters.push(previousFilter);
         filters.push(currentFilter);
+        filters.push(nextFilter);
         filters.push(recentFilter);
         filters.push(notUpdatedSince4Months);
         filters.push(newNoteworthyFilter);
@@ -340,34 +446,48 @@ export class TeamBacklogGenerator {
 
       // sort sections following different rules
 
-      // current sprint = milestone order then issue number
       const currentSprintValues: RawDefinition[] = sortedMap.get(SortCategory.CURRENT_SPRINT)!;
+      // sort by priority then milestone
       currentSprintValues.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
 
-        // sort by milestone which should be there
-        if (rawDefinition1.milestone && rawDefinition2.milestone) {
-          if (rawDefinition1.milestone === rawDefinition2.milestone) {
-            return this.compareIdentifier(rawDefinition1, rawDefinition2);
+          if (this.priorityNumber(rawDefinition1) === this.priorityNumber(rawDefinition2)) {
+            return rawDefinition1.milestone.localeCompare(rawDefinition2.milestone);
+          } else {
+            return this.comparePriority(rawDefinition1, rawDefinition2);
           }
-          return rawDefinition1.milestone.localeCompare(rawDefinition2.milestone);
-        } else {
-          return this.compareIdentifier(rawDefinition1, rawDefinition2);
-        }
       });
 
-      // current spring = milestone order then issue number
+      const nextSprintValues: RawDefinition[] = sortedMap.get(SortCategory.NEXT_SPRINT)!;
+      // sort by priority then milestone
+      nextSprintValues.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+
+          if (this.priorityNumber(rawDefinition1) === this.priorityNumber(rawDefinition2)) {
+            return rawDefinition1.milestone.localeCompare(rawDefinition2.milestone);
+          } else {
+            return this.comparePriority(rawDefinition1, rawDefinition2);
+          }
+      });
+
+      const previousSprintValues: RawDefinition[] = sortedMap.get(SortCategory.PREVIOUS_SPRINT)!;
+      // sort by priority then milestone
+      previousSprintValues.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+
+          if (this.priorityNumber(rawDefinition1) === this.priorityNumber(rawDefinition2)) {
+            return rawDefinition1.milestone.localeCompare(rawDefinition2.milestone);
+          } else {
+            return this.comparePriority(rawDefinition1, rawDefinition2);
+          }
+      });
+
+
+      // recentValues order by priority
       const recentValues: RawDefinition[] = sortedMap.get(SortCategory.RECENT)!;
       recentValues.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
 
-        // sort by milestone which should be there
-        if (rawDefinition1.created && rawDefinition2.created) {
-          if (rawDefinition1.created === rawDefinition2.created) {
-            return this.compareIdentifier(rawDefinition1, rawDefinition2);
-          }
-          // reverse order to have more recent first
-          return rawDefinition2.created.localeCompare(rawDefinition1.created);
+        if (this.priorityNumber(rawDefinition1) === this.priorityNumber(rawDefinition2)) {
+          return rawDefinition1.milestone.localeCompare(rawDefinition2.milestone);
         } else {
-          return this.compareIdentifier(rawDefinition1, rawDefinition2);
+          return this.comparePriority(rawDefinition1, rawDefinition2);
         }
       });
 
@@ -425,10 +545,7 @@ export class TeamBacklogGenerator {
 
 
       const keys = Array.from(sortedMap.keys());
-      const batchUpdates: any[] = [];
-      const batchUpdateOneOfRangeRequests: any[] = [];
 
-      const teamSheetName = `${teamName}-prio`;
 
       keys.forEach(key => {
         const title = `${key.toUpperCase()}`;
@@ -490,7 +607,7 @@ export class TeamBacklogGenerator {
 
             // add quote to not let numbers
             const milestone = `'${rawDefinition.milestone}`;
-            return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, rawDefinition.assignee, this.getAreaLabels(rawDefinition.labels), rawDefinition.status, rawDefinition.link, kind, severity]
+            return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, rawDefinition.assignee, this.getAreaLabels(rawDefinition.labels, ","), rawDefinition.status, rawDefinition.link, kind, severity]
           });
           const endColumns = newValues[0].length;
 
@@ -749,14 +866,15 @@ export class TeamBacklogGenerator {
 
   }
 
-  getAreaLabels(labelLine: string): string {
+  getAreaLabels(labelLine: string, separator?: string): string {
+    const useSeparator = separator ? separator : '\n';
     if (labelLine && labelLine.length > 0) {
       const labels: string[] = [];
       const originLabels = labelLine.split(',');
       originLabels.forEach(originLabel => {
         originLabel.split('\n').forEach(item => labels.push(item));
       });
-      return labels.filter(item => item.startsWith('area/')).map(item => item.substring('area/'.length)).sort().join('\n');
+      return labels.filter(item => item.startsWith('area/')).map(item => item.substring('area/'.length)).sort().join(useSeparator);
     } else {
       return '';
     }

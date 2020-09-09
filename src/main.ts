@@ -6,6 +6,7 @@ import { JiraImport } from "./spreadsheet/jira-import";
 import { RowUpdater } from "./spreadsheet/row-updater";
 import { TeamBacklogGenerator } from "./spreadsheet/team-backlog-generator";
 import { ValidationUpdater } from "./spreadsheet/validation-updater";
+import { CrwVersionFetcher } from "./versions/crw-version-fetcher";
 
 const githubReadToken: string = process.env.HUBOT_GITHUB_TOKEN || "";
 if ("" === githubReadToken) {
