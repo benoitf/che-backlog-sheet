@@ -134,6 +134,8 @@ export class TeamBacklogGenerator {
         return rawDefinition.link.substring('https://issues.redhat.com/browse/'.length);
       } else if (rawDefinition.link && rawDefinition.link.startsWith('https://github.com/eclipse/che/issues/')) {
         return `GH-${rawDefinition.link.substring('https://github.com/eclipse/che/issues/'.length)}`;
+      } else if (rawDefinition.link && rawDefinition.link.startsWith('https://github.com/eclipse-theia/theia/issues/')) {
+        return `THEIA-${rawDefinition.link.substring('https://github.com/eclipse-theia/theia/issues/'.length)}`;
       } else {
         return rawDefinition.link;
       }

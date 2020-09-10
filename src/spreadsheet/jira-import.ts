@@ -209,6 +209,7 @@ export class JiraImport {
         issueDef.severity = this.getSeverity(issueData);
         issueDef.title = this.getTitle(issueData);
         issueDef.link = issueLink;
+        issueDef.labels = this.getLabels(issueData);
         issueDef.state = this.getState(issueData);
         issueDef.status = this.getStatus(issueData);
         issueDef.milestone = this.getMilestone(issueData);
@@ -232,7 +233,7 @@ export class JiraImport {
           status: this.getStatus(issueData),
           milestone: this.getMilestone(issueData),
           kind: this.getKind(issueData),
-          labels: "",
+          labels: this.getLabels(issueData),
           severity: this.getSeverity(issueData),
           title: this.getTitle(issueData),
           link: issueLink,
@@ -389,6 +390,33 @@ export class JiraImport {
       return matchingTeams[0];
     } else {
       return `${matchingTeams.join(",")}`;
+    }
+
+  }
+
+  public getLabels(issueData: any): string {
+
+    const foundLabels: string[] = [];
+    // get areas label
+
+    const components = issueData.fields.components;
+    if (components) {
+      components.forEach((component: any) => {
+        const componentName = component.name || "";
+        if (componentName !== '') {
+            const split = componentName.split(':');
+            if (split.length > 0) {
+              foundLabels.push(split[0]);
+            }
+          }
+        });
+    }
+    foundLabels.sort();
+
+    if (foundLabels.length === 0) {
+      return "";
+    } else {
+      return `${foundLabels.join(",")}`;
     }
 
   }

@@ -28,6 +28,7 @@ export class GithubImport {
 
     await this.importChe(simpleDate);
     await this.importRedhatChe(simpleDate);
+    await this.importEclipseTheia(simpleDate);
   }
 
   public async importChe(simpleDate: string): Promise<void> {
@@ -64,6 +65,33 @@ export class GithubImport {
         issueData.labels = [hostedCheLabel];
       } else {
         issueData.labels.push(hostedCheLabel);
+      }
+      return issueData;
+    });
+    await this.handleIssues(updatedIssues);
+
+  }
+
+
+  public async importEclipseTheia(simpleDate: string): Promise<void> {
+    // get all issues not updated since this date and that are not in frozen state
+    const options = this.githubRead.search.issuesAndPullRequests.endpoint.merge({
+      q: `repo:eclipse-theia/theia is:issue label:"Team: Che-Editors" updated:>=${simpleDate}`, // state:open for first import
+      sort: "updated",
+      order: "asc",
+      per_page: 100,
+    });
+
+    const response = await this.githubRead.paginate(options);
+
+    // update to include team to be hosted-che
+    const updatedIssues = response.map((issueData: any) => {
+      const labels = issueData.labels;
+      const editorsCheLabel = { name: 'area/editor/che-theia' };
+      if (!labels) {
+        issueData.labels = [editorsCheLabel];
+      } else {
+        issueData.labels.push(editorsCheLabel);
       }
       return issueData;
     });
@@ -236,12 +264,15 @@ export class GithubImport {
 
     areasTeams.set("area/devfile", "platform");
     areasTeams.set("area/wsmaster", "platform");
+    areasTeams.set("area/cheserver", "platform");
     areasTeams.set("area/factories", "platform");
     areasTeams.set("area/factory/server", "platform");
     areasTeams.set("area/security", "platform");
     areasTeams.set("area/teams", "platform");
     areasTeams.set("area/workspace-sharing", "platform");
     areasTeams.set("area/jwt-proxy", "platform");
+    areasTeams.set("area/devfile/v1", "platform");
+
 
     areasTeams.set("area/cli", "deploy");
     areasTeams.set("area/chectl", "deploy");
@@ -262,6 +293,7 @@ export class GithubImport {
     areasTeams.set("area/workspace-client-lib", "controller");
     areasTeams.set("area/workspace-loader", "controller");
     areasTeams.set("area/cloudshell", "controller");
+    areasTeams.set("area/devfile/v2", "controller");
 
 
     areasTeams.set("area/debugger", "plugins");
@@ -277,6 +309,8 @@ export class GithubImport {
     areasTeams.set("area/pr-panel", "plugins");
 
     areasTeams.set("area/che-theia", "editors");
+    areasTeams.set("area/editor/che-theia", "editors");
+    areasTeams.set("area/editor/intellij", "editors");
 
     areasTeams.set("area/dev-experience", "devex");
 
