@@ -15,7 +15,7 @@ enum SortCategory {
   NEXT_SPRINT = '',
   RECENT = 'RECENT ISSUES / LAST 3 Weeks order by priority then milestone / Automatically updated',
   //NOT_UPDATED_SINCE_5_MONTHS = 'Stale issues (older --> newer) ( > 5 months without update) / Automatically updated',
-  NEW_NOTEWORTHY = 'New & Noteworthy / Automatically updated',
+  // NEW_NOTEWORTHY = 'New & Noteworthy / Automatically updated',
   BLOCKER = 'Blocker issues / Automatically updated',
   JIRA_CRITICAL = 'JIRA Critical issues / Automatically updated',
   GITHUB_P1 = 'Github P1 issues / Automatically updated',
@@ -262,7 +262,7 @@ export class TeamBacklogGenerator {
 
       const teamSheetName = `${teamName}-prio`;
 
-      const legend =  `🚫 sev/blocker, 🔺 sev/critical sev/p1, ⬆ sev/major sev/p2, ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📦 kind/release`;
+      const legend =  `🚫 sev/blocker, 🔺 sev/critical sev/p1, ⬆ sev/major sev/p2, ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📦 kind/release, 📖 new&noteworthy, ⏰ stale (> 150days without update)`;
 
       const valuesUpdate = {
         range: `${teamSheetName}!A${rowNewIndex}:A${rowNewIndex + 1}`,
@@ -359,12 +359,12 @@ export class TeamBacklogGenerator {
           return undefined;
         }
 
-        const newNoteworthyFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+       /* const newNoteworthyFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           if (backlogIssueDef.labels && backlogIssueDef.labels.includes('new&noteworthy')) {
             return SortCategory.NEW_NOTEWORTHY;
           }
           return undefined;
-        }
+        }*/
 
 
         const severityCheck = (backlogIssueDef: RawDefinition, severity: string): boolean => {
@@ -417,8 +417,8 @@ export class TeamBacklogGenerator {
         filters.push(currentFilter);
         filters.push(nextFilter);
         filters.push(recentFilter);
-        //filters.push(notUpdatedSince4Months);
-        filters.push(newNoteworthyFilter);
+        // filters.push(notUpdatedSince4Months);
+        // filters.push(newNoteworthyFilter);
         filters.push(blockerFilter);
         filters.push(jiraCriticalFilter);
         filters.push(githubP1Filter);
@@ -536,9 +536,9 @@ export class TeamBacklogGenerator {
       sortedMap.get(SortCategory.JIRA_MAJOR)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
         return this.compareIdentifier(rawDefinition1, rawDefinition2);
       });
-      sortedMap.get(SortCategory.NEW_NOTEWORTHY)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+      /*sortedMap.get(SortCategory.NEW_NOTEWORTHY)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
         return this.compareIdentifier(rawDefinition1, rawDefinition2);
-      });
+      });*/
       sortedMap.get(SortCategory.UNSORTED)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
         return this.compareIdentifier(rawDefinition1, rawDefinition2);
       });
@@ -601,13 +601,57 @@ export class TeamBacklogGenerator {
               prefix += `     `;
             }
 
+            // stale issues
+            let appendix = '';
+            let lastUpdated;
+            if (rawDefinition.created) {
+              lastUpdated = rawDefinition.created;
+            }
+            if (rawDefinition.updated) {
+              lastUpdated = rawDefinition.updated;
+            }
+  
+            if (lastUpdated) {
+              const now = moment.utc();
+              const timestamp = parseInt(lastUpdated);
+              const lastUpdate = moment(timestamp);
+              const duration = moment.duration(now.diff(lastUpdate));
+              if (duration.asDays() > 150) {
+                appendix += '⏰ ';
+              }
+            }
 
+            if (rawDefinition.labels && rawDefinition.labels.includes('new&noteworthy')) {
+              appendix += '📖 ';
+            }
+  
             // prefix issue number
-            title = `${this.shortIdentifier(rawDefinition)}: ${title}`;
+            title = `${this.shortIdentifier(rawDefinition)}: ${appendix}${title}`;
 
             // add quote to not let numbers
-            const milestone = `'${rawDefinition.milestone}`;
-            return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, rawDefinition.assignee, this.getAreaLabels(rawDefinition.labels, ","), rawDefinition.status]
+            let milestone;
+            if (rawDefinition.milestone && rawDefinition.milestone.length > 0) {
+              milestone = `'${rawDefinition.milestone}`;
+            } else {
+              milestone = ' ';
+            }
+            let assignee;
+            if (rawDefinition.assignee && rawDefinition.assignee.length > 0) {
+              assignee = rawDefinition.assignee;
+            } else {
+              assignee = ' ';
+            }
+            let status;
+            if (rawDefinition.status && rawDefinition.status.length > 0) {
+              status = rawDefinition.status;
+            } else {
+              status = ' ';
+            }
+            let labels = this.getAreaLabels(rawDefinition.labels, ",");
+            if (labels.length  === 0) {
+              labels = ' ';
+            }
+            return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, assignee, labels, status]
           });
           const endColumns = newValues[0].length;
 
