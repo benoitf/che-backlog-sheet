@@ -55,7 +55,7 @@ export class TeamRowUpdater {
       buildRow[this.mapping.get(TeamRowUpdater.AREAS)!] = rawDefinition.areas;
     }
     if (this.mapping.has(TeamRowUpdater.MILESTONE)) {
-      buildRow[this.mapping.get(TeamRowUpdater.MILESTONE)!] = rawDefinition.milestone;
+      buildRow[this.mapping.get(TeamRowUpdater.MILESTONE)!] = `'${rawDefinition.milestone}`;
     }
     if (this.mapping.has(TeamRowUpdater.PRIORITY)) {
       buildRow[this.mapping.get(TeamRowUpdater.PRIORITY)!] = rawDefinition.priority;

@@ -54,7 +54,7 @@ export class RowUpdater {
     }
 
     if (this.mapping.has(RowUpdater.MILESTONE)) {
-      buildRow[this.mapping.get(RowUpdater.MILESTONE)!] = rawDefinition.milestone;
+      buildRow[this.mapping.get(RowUpdater.MILESTONE)!] = `'${rawDefinition.milestone}`;
     }
 
     if (this.mapping.has(RowUpdater.TEAM)) {
