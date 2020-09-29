@@ -8,14 +8,13 @@ import * as moment from 'moment';
 import { CheVersionFetcher } from "../versions/che-version-fetcher";
 import { CrwVersionFetcher } from "../versions/crw-version-fetcher";
 import * as semver from "semver";
+import { TheiaVersionFetcher } from "../versions/theia-version-fetcher";
 
 enum SortCategory {
   PREVIOUS_SPRINT = '',
   CURRENT_SPRINT = '',
   NEXT_SPRINT = '',
   RECENT = 'RECENT ISSUES / LAST 3 Weeks order by priority then milestone / Automatically updated',
-  //NOT_UPDATED_SINCE_5_MONTHS = 'Stale issues (older --> newer) ( > 5 months without update) / Automatically updated',
-  // NEW_NOTEWORTHY = 'New & Noteworthy / Automatically updated',
   BLOCKER = 'Blocker issues / Automatically updated',
   JIRA_CRITICAL = 'JIRA Critical issues / Automatically updated',
   GITHUB_P1 = 'Github P1 issues / Automatically updated',
@@ -287,11 +286,17 @@ export class TeamBacklogGenerator {
       const crwNextSprintMilestone = await crwVersionFetcher.getNextSprint();
       const crwPreviousSprintMilestone = await crwVersionFetcher.getPreviousSprint();
 
+      // current Theia milestone =
+      const theiaVersionFetcher = new TheiaVersionFetcher();
+      await theiaVersionFetcher.init();
+      const theiaCurrentSprintMilestone = await theiaVersionFetcher.getCurrentSprint();
+      const theiaNextSprintMilestone = await theiaVersionFetcher.getNextSprint();
+      const theiaPreviousSprintMilestone = await theiaVersionFetcher.getPreviousSprint();
+      
       // update title
-      (SortCategory as any)['PREVIOUS_SPRINT'] = `Ended Sprint (${chePreviousprintMilestone} or ${crwPreviousSprintMilestone}) / order by priority then milestone / Automatically updated`;
-      (SortCategory as any)['CURRENT_SPRINT'] = `Current Sprint (${cheCurrentSprintMilestone} or ${crwCurrentSprintMilestone}) / order by priority then milestone / Automatically updated`;
-      (SortCategory as any)['NEXT_SPRINT'] = `Candidate Sprint (${cheNextSprintMilestone} or ${crwNextSprintMilestone}) / order by priority then milestone / Automatically updated`;
-
+      (SortCategory as any)['PREVIOUS_SPRINT'] = `Ended Sprint (CHE/${chePreviousprintMilestone} CRW/${crwPreviousSprintMilestone} THEIA/${theiaPreviousSprintMilestone}) / order by priority then milestone / Automatically updated`;
+      (SortCategory as any)['CURRENT_SPRINT'] = `Current Sprint (CHE/${cheCurrentSprintMilestone} CRW/${crwCurrentSprintMilestone} THEIA/${theiaCurrentSprintMilestone}) / order by priority then milestone / Automatically updated`;
+      (SortCategory as any)['NEXT_SPRINT'] = `Candidate Sprint (CHE/${cheNextSprintMilestone} CRW/${crwNextSprintMilestone} THEIA/${theiaNextSprintMilestone}) / order by priority then milestone / Automatically updated`;
 
       // initialize map
       const sortedMap: Map<SortCategory, RawDefinition[]> = new Map();
@@ -315,6 +320,12 @@ export class TeamBacklogGenerator {
               return SortCategory.PREVIOUS_SPRINT;
             }
           }
+          if (theiaPreviousSprintMilestone) {
+            if (theiaPreviousSprintMilestone === backlogIssueDef.milestone && backlogIssueDef.link && backlogIssueDef.link.startsWith('https://github.com/eclipse-theia/theia/issues/')) {
+              return SortCategory.PREVIOUS_SPRINT;
+            }
+          }
+
           return undefined;
         }
 
@@ -329,6 +340,12 @@ export class TeamBacklogGenerator {
               return SortCategory.CURRENT_SPRINT;
             }
           }
+          if (theiaCurrentSprintMilestone) {
+            if (theiaCurrentSprintMilestone === backlogIssueDef.milestone && backlogIssueDef.link && backlogIssueDef.link.startsWith('https://github.com/eclipse-theia/theia/issues/')) {
+              return SortCategory.CURRENT_SPRINT;
+            }
+          }
+
           return undefined;
         }
 
@@ -343,6 +360,11 @@ export class TeamBacklogGenerator {
               return SortCategory.NEXT_SPRINT;
             }
           }
+          if (theiaNextSprintMilestone) {
+            if (theiaNextSprintMilestone === backlogIssueDef.milestone && backlogIssueDef.link && backlogIssueDef.link.startsWith('https://github.com/eclipse-theia/theia/issues/')) {
+              return SortCategory.NEXT_SPRINT;
+            }
+          }          
           return undefined;
         }
 
