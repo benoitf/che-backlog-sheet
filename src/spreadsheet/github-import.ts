@@ -29,6 +29,7 @@ export class GithubImport {
     await this.importChe(simpleDate);
     await this.importRedhatChe(simpleDate);
     await this.importEclipseTheia(simpleDate);
+    await this.importDevWorkspaceOperator(simpleDate);
   }
 
   public async importChe(simpleDate: string): Promise<void> {
@@ -72,6 +73,31 @@ export class GithubImport {
 
   }
 
+  public async importDevWorkspaceOperator(simpleDate: string): Promise<void> {
+    // get all issues not updated since this date and that are not in frozen state
+    const options = this.githubRead.search.issuesAndPullRequests.endpoint.merge({
+      q: `repo:devfile/devworkspace-operator updated:>=${simpleDate} is:issue`, // state:open for first import
+      sort: "updated",
+      order: "asc",
+      per_page: 100,
+    });
+
+    const response = await this.githubRead.paginate(options);
+
+    // update to include team to be hosted-che
+    const updatedIssues = response.map((issueData: any) => {
+      const labels = issueData.labels;
+      const devWorkspaceLabel = { name: 'area/dev-workspace' };
+      if (!labels) {
+        issueData.labels = [devWorkspaceLabel];
+      } else {
+        issueData.labels.push(devWorkspaceLabel);
+      }
+      return issueData;
+    });
+    await this.handleIssues(updatedIssues);
+
+  }
 
   public async importEclipseTheia(simpleDate: string): Promise<void> {
     // get all issues not updated since this date and that are not in frozen state
@@ -294,7 +320,7 @@ export class GithubImport {
     areasTeams.set("area/workspace-loader", "controller");
     areasTeams.set("area/cloudshell", "controller");
     areasTeams.set("area/devfile/v2", "controller");
-
+    
 
     areasTeams.set("area/debugger", "plugins");
     areasTeams.set("area/devfile-registry", "plugins");
