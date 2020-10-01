@@ -28,7 +28,8 @@ export class GithubImport {
 
     await this.importChe(simpleDate);
     await this.importRedhatChe(simpleDate);
-    await this.importEclipseTheia(simpleDate);
+    await this.importEclipseTheiaEditors(simpleDate);
+    await this.importEclipseTheiaPlugins(simpleDate);
     await this.importDevWorkspaceOperator(simpleDate);
   }
 
@@ -99,7 +100,7 @@ export class GithubImport {
 
   }
 
-  public async importEclipseTheia(simpleDate: string): Promise<void> {
+  public async importEclipseTheiaEditors(simpleDate: string): Promise<void> {
     // get all issues not updated since this date and that are not in frozen state
     const options = this.githubRead.search.issuesAndPullRequests.endpoint.merge({
       q: `repo:eclipse-theia/theia is:issue label:"Team: Che-Editors" updated:>=${simpleDate}`, // state:open for first import
@@ -114,6 +115,32 @@ export class GithubImport {
     const updatedIssues = response.map((issueData: any) => {
       const labels = issueData.labels;
       const editorsCheLabel = { name: 'area/editor/che-theia' };
+      if (!labels) {
+        issueData.labels = [editorsCheLabel];
+      } else {
+        issueData.labels.push(editorsCheLabel);
+      }
+      return issueData;
+    });
+    await this.handleIssues(updatedIssues);
+
+  }
+
+  public async importEclipseTheiaPlugins(simpleDate: string): Promise<void> {
+    // get all issues not updated since this date and that are not in frozen state
+    const options = this.githubRead.search.issuesAndPullRequests.endpoint.merge({
+      q: `repo:eclipse-theia/theia is:issue label:"Team: Che-Plugins" state:open`, // state:open for first import
+      sort: "updated",
+      order: "asc",
+      per_page: 100,
+    });
+
+    const response = await this.githubRead.paginate(options);
+
+    // update to include team to be hosted-che
+    const updatedIssues = response.map((issueData: any) => {
+      const labels = issueData.labels;
+      const editorsCheLabel = { name: 'area/plugins' };
       if (!labels) {
         issueData.labels = [editorsCheLabel];
       } else {
