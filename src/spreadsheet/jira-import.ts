@@ -367,9 +367,36 @@ export class JiraImport {
     areasTeams.set("area/doc", "doc");
 
 
-    const matchingTeams: string[] = [];
-    // get areas label
+    const labels = issueData.fields.labels;
+    // first search if there is an assigned team
+    let foundTeams: string[] = [];
+    if (labels) {
+      labels.forEach((label: string) => {
+        if (label.startsWith("team/")) {
+          foundTeams.push(label.substring("team/".length));
+        }
+      });
 
+      // team/languages is mapped to team/plugin
+      foundTeams = foundTeams.map(label => {
+        if (label === 'languages') {
+          return 'plugins';
+        } else if (label === 'rhche-qe') {
+          return 'hosted-che';
+        } else {
+          return label;
+        }
+      });
+
+      if (foundTeams.length === 1) {
+        return foundTeams[0];
+      } else if (foundTeams.length > 1) {
+        return `${foundTeams.join(",")}`;
+      }
+    }
+
+    // get areas label
+    const matchingTeams: string[] = [];
     const components = issueData.fields.components;
     if (components) {
       components.forEach((component: any) => {
