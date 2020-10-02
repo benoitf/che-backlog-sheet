@@ -129,7 +129,7 @@ export class GithubImport {
   public async importEclipseTheiaPlugins(simpleDate: string): Promise<void> {
     // get all issues not updated since this date and that are not in frozen state
     const options = this.githubRead.search.issuesAndPullRequests.endpoint.merge({
-      q: `repo:eclipse-theia/theia is:issue label:"Team: Che-Plugins" state:open`, // state:open for first import
+      q: `repo:eclipse-theia/theia is:issue label:"Team: Che-Plugins" updated:>=${simpleDate}`, // state:open for first import
       sort: "updated",
       order: "asc",
       per_page: 100,
