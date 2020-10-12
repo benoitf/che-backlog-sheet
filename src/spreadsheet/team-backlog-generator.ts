@@ -20,6 +20,8 @@ enum SortCategory {
   GITHUB_P1 = 'Github P1 issues / Automatically updated',
   JIRA_MAJOR = 'JIRA Major issues / Automatically updated',
   GITHUB_P2 = 'Github P2 issues / Automatically updated',
+  JIRA_MINOR = 'JIRA Minor issues / Automatically updated',
+  GITHUB_P3 = 'Github P3 issues / Automatically updated',
   UNSORTED = 'Unsorted issues / Automatically updated',
 }
 
@@ -265,7 +267,7 @@ export class TeamBacklogGenerator {
 
       const teamSheetName = `${teamName}-prio`;
 
-      const legend =  `🚫 sev/blocker, 🔺 sev/critical sev/p1, ⬆ sev/major sev/p2, ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📦 kind/release, 📖 new&noteworthy, ⏰ stale (> 150days without update)`;
+      const legend =  `🚫 sev/blocker, 🔺 sev/critical|p1, 🔸 sev/major|p2, 🔹 sev/minor|p3 ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📦 kind/release, 📖 new&noteworthy, ⏰ stale (> 150days without update)`;
 
       const valuesUpdate = {
         range: `${teamSheetName}!A${rowNewIndex}:A${rowNewIndex + 1}`,
@@ -408,12 +410,17 @@ export class TeamBacklogGenerator {
         const githubP1Filter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           return severityCheck(backlogIssueDef, 'p1') ? SortCategory.GITHUB_P1 : undefined
         }
-
         const jiraMajorFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           return severityCheck(backlogIssueDef, 'major') ? SortCategory.JIRA_MAJOR : undefined
         }
+        const jiraMinorFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+          return severityCheck(backlogIssueDef, 'minor') ? SortCategory.JIRA_MINOR : undefined
+        }
         const githubP2Filter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           return severityCheck(backlogIssueDef, 'p2') ? SortCategory.GITHUB_P2 : undefined
+        }
+        const githubP3Filter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+          return severityCheck(backlogIssueDef, 'p3') ? SortCategory.GITHUB_P3 : undefined
         }
 
 /*
@@ -449,7 +456,9 @@ export class TeamBacklogGenerator {
         filters.push(jiraCriticalFilter);
         filters.push(githubP1Filter);
         filters.push(jiraMajorFilter);
+        filters.push(jiraMinorFilter);
         filters.push(githubP2Filter);
+        filters.push(githubP3Filter);
 
         let category: SortCategory | undefined;
         let index = 0;
@@ -556,6 +565,9 @@ export class TeamBacklogGenerator {
       sortedMap.get(SortCategory.GITHUB_P2)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
         return this.compareIdentifier(rawDefinition1, rawDefinition2);
       });
+      sortedMap.get(SortCategory.GITHUB_P3)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+        return this.compareIdentifier(rawDefinition1, rawDefinition2);
+      });
       sortedMap.get(SortCategory.JIRA_CRITICAL)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
         return this.compareIdentifier(rawDefinition1, rawDefinition2);
       });
@@ -599,7 +611,9 @@ export class TeamBacklogGenerator {
               } else if (severity.toLowerCase() === 'p1' || severity.toLowerCase() === 'critical') {
                 prefix += `🔺 `;
               } else if (severity.toLowerCase() === 'p2' || severity.toLowerCase() === 'major') {
-                prefix += `⬆  `;
+                prefix += `🔸 `;
+              } else if (severity.toLowerCase() === 'p3' || severity.toLowerCase() === 'minor') {
+                prefix += `🔹 `;
               } else {
                 prefix += `     `;
               }
