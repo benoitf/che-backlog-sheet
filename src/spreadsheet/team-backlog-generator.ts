@@ -279,28 +279,28 @@ export class TeamBacklogGenerator {
       // current che milestone =
       const cheVersionFetcher = new CheVersionFetcher();
       await cheVersionFetcher.init();
-      const cheCurrentSprintMilestone = await cheVersionFetcher.getCurrentSprint();
-      const cheNextSprintMilestone = await cheVersionFetcher.getNextSprint();
-      const chePreviousprintMilestone = await cheVersionFetcher.getPreviousSprint();
+      const cheCurrentSprintMilestone = `CHE/${await cheVersionFetcher.getCurrentSprint()}`;
+      const cheNextSprintMilestone = `CHE/${await cheVersionFetcher.getNextSprint()}`;
+      const chePreviousprintMilestone = `CHE/${await cheVersionFetcher.getPreviousSprint()}`;
 
       // current CRW milestone =
       const crwVersionFetcher = new CrwVersionFetcher();
       await crwVersionFetcher.init();
-      const crwCurrentSprintMilestone = await crwVersionFetcher.getCurrentSprint();
-      const crwNextSprintMilestone = await crwVersionFetcher.getNextSprint();
-      const crwPreviousSprintMilestone = await crwVersionFetcher.getPreviousSprint();
+      const crwCurrentSprintMilestone = `CRW/${await crwVersionFetcher.getCurrentSprint()}`;
+      const crwNextSprintMilestone = `CRW/${await crwVersionFetcher.getNextSprint()}`;
+      const crwPreviousSprintMilestone = `CRW/${await crwVersionFetcher.getPreviousSprint()}`;
 
       // current Theia milestone =
       const theiaVersionFetcher = new TheiaVersionFetcher();
       await theiaVersionFetcher.init();
-      const theiaCurrentSprintMilestone = await theiaVersionFetcher.getCurrentSprint();
-      const theiaNextSprintMilestone = await theiaVersionFetcher.getNextSprint();
-      const theiaPreviousSprintMilestone = await theiaVersionFetcher.getPreviousSprint();
+      const theiaCurrentSprintMilestone = `THEIA/${await theiaVersionFetcher.getCurrentSprint()}`;
+      const theiaNextSprintMilestone = `THEIA/${await theiaVersionFetcher.getNextSprint()}`;
+      const theiaPreviousSprintMilestone = `THEIA/${await theiaVersionFetcher.getPreviousSprint()}`;
       
       // update title
-      (SortCategory as any)['PREVIOUS_SPRINT'] = `Ended Sprint (CHE/${chePreviousprintMilestone} CRW/${crwPreviousSprintMilestone} THEIA/${theiaPreviousSprintMilestone}) / order by priority then milestone / Automatically updated`;
-      (SortCategory as any)['CURRENT_SPRINT'] = `Current Sprint (CHE/${cheCurrentSprintMilestone} CRW/${crwCurrentSprintMilestone} THEIA/${theiaCurrentSprintMilestone}) / order by priority then milestone / Automatically updated`;
-      (SortCategory as any)['NEXT_SPRINT'] = `Candidate Sprint (CHE/${cheNextSprintMilestone} CRW/${crwNextSprintMilestone} THEIA/${theiaNextSprintMilestone}) / order by priority then milestone / Automatically updated`;
+      (SortCategory as any)['PREVIOUS_SPRINT'] = `Ended Sprint (${chePreviousprintMilestone} ${crwPreviousSprintMilestone} ${theiaPreviousSprintMilestone}) / order by priority then milestone / Automatically updated`;
+      (SortCategory as any)['CURRENT_SPRINT'] = `Current Sprint (${cheCurrentSprintMilestone} ${crwCurrentSprintMilestone} ${theiaCurrentSprintMilestone}) / order by priority then milestone / Automatically updated`;
+      (SortCategory as any)['NEXT_SPRINT'] = `Candidate Sprint (${cheNextSprintMilestone} ${crwNextSprintMilestone} ${theiaNextSprintMilestone}) / order by priority then milestone / Automatically updated`;
 
       // initialize map
       const sortedMap: Map<SortCategory, RawDefinition[]> = new Map();
@@ -314,64 +314,46 @@ export class TeamBacklogGenerator {
         const filters: ((backlogIssueDef: RawDefinition) => SortCategory | undefined)[] = [];
 
         const previousFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
-          if (chePreviousprintMilestone) {
-            if (chePreviousprintMilestone === backlogIssueDef.milestone) {
+          const issueMilestone = this.getMilestoneVersions(backlogIssueDef);
+          if (chePreviousprintMilestone && issueMilestone.includes(chePreviousprintMilestone)) {
               return SortCategory.PREVIOUS_SPRINT;
-            }
           }
-          if (crwPreviousSprintMilestone) {
-            if (crwPreviousSprintMilestone === backlogIssueDef.milestone) {
+          if (crwPreviousSprintMilestone && issueMilestone.includes(crwPreviousSprintMilestone)) {
               return SortCategory.PREVIOUS_SPRINT;
-            }
           }
-          if (theiaPreviousSprintMilestone) {
-            if (theiaPreviousSprintMilestone === backlogIssueDef.milestone && backlogIssueDef.link && backlogIssueDef.link.startsWith('https://github.com/eclipse-theia/theia/issues/')) {
+          if (theiaPreviousSprintMilestone && issueMilestone.includes(theiaPreviousSprintMilestone)) {
               return SortCategory.PREVIOUS_SPRINT;
-            }
           }
-
           return undefined;
         }
 
         const currentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
-          if (cheCurrentSprintMilestone) {
-            if (cheCurrentSprintMilestone === backlogIssueDef.milestone) {
+          const issueMilestone = this.getMilestoneVersions(backlogIssueDef);
+          if (cheCurrentSprintMilestone && issueMilestone.includes(cheCurrentSprintMilestone)) {
               return SortCategory.CURRENT_SPRINT;
-            }
           }
-          if (crwCurrentSprintMilestone) {
-            if (crwCurrentSprintMilestone === backlogIssueDef.milestone) {
+          if (crwCurrentSprintMilestone && issueMilestone.includes(crwCurrentSprintMilestone)) {
               return SortCategory.CURRENT_SPRINT;
-            }
           }
-          if (theiaCurrentSprintMilestone) {
-            if (theiaCurrentSprintMilestone === backlogIssueDef.milestone && backlogIssueDef.link && backlogIssueDef.link.startsWith('https://github.com/eclipse-theia/theia/issues/')) {
+          if (theiaCurrentSprintMilestone && issueMilestone.includes(theiaCurrentSprintMilestone)) {
               return SortCategory.CURRENT_SPRINT;
-            }
           }
-
           return undefined;
         }
 
         const nextFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
-          if (cheNextSprintMilestone) {
-            if (cheNextSprintMilestone === backlogIssueDef.milestone) {
-              return SortCategory.NEXT_SPRINT;
-            }
+          const issueMilestone = this.getMilestoneVersions(backlogIssueDef);
+          if (cheNextSprintMilestone && issueMilestone.includes(cheNextSprintMilestone)) {
+            return SortCategory.NEXT_SPRINT;
           }
-          if (crwNextSprintMilestone) {
-            if (crwNextSprintMilestone === backlogIssueDef.milestone) {
-              return SortCategory.NEXT_SPRINT;
-            }
+          if (crwNextSprintMilestone && issueMilestone.includes(crwNextSprintMilestone)) {
+            return SortCategory.NEXT_SPRINT;
           }
-          if (theiaNextSprintMilestone) {
-            if (theiaNextSprintMilestone === backlogIssueDef.milestone && backlogIssueDef.link && backlogIssueDef.link.startsWith('https://github.com/eclipse-theia/theia/issues/')) {
-              return SortCategory.NEXT_SPRINT;
-            }
-          }          
+          if (theiaNextSprintMilestone && issueMilestone.includes(theiaNextSprintMilestone)) {
+            return SortCategory.NEXT_SPRINT;
+          }
           return undefined;
         }
-
 
 
         const recentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
@@ -671,7 +653,7 @@ export class TeamBacklogGenerator {
             // add quote to not let numbers
             let milestone;
             if (rawDefinition.milestone && rawDefinition.milestone.length > 0) {
-              milestone = `'${rawDefinition.milestone}`;
+              milestone = `'${this.getMilestoneVersions(rawDefinition).join(',')}`
             } else {
               milestone = ' ';
             }
@@ -964,4 +946,39 @@ export class TeamBacklogGenerator {
     }
   }
 
+  protected getMilestoneVersions(rawDefinition: RawDefinition): string[] {
+    if (rawDefinition.link && rawDefinition.link.startsWith('https://github.com/eclipse-theia/theia/issues/')) {
+      return [`THEIA/${rawDefinition.milestone}`];
+    }
+    if (rawDefinition.link && rawDefinition.link.startsWith('https://issues.redhat.com/browse/CRW')) {
+      return [`CRW/${rawDefinition.milestone}`];
+    }
+    if (rawDefinition.link && rawDefinition.link.startsWith('https://issues.redhat.com/browse/WTO')) {
+      return [`WTO/${rawDefinition.milestone}`];
+    }
+    if (rawDefinition.link && rawDefinition.link.startsWith('https://issues.redhat.com/browse/RHDEVDOCS')) {
+      // split ?
+      const titleMap = (title: string) => {
+        if (title.startsWith('CRW ')) {
+          return 'CRW/'.concat(title.substring('CRW '.length)).concat('.GA');
+        }else if (title.startsWith('Che ')) {
+            return 'CHE/'.concat(title.substring('Che '.length));
+          } else {
+          return title;
+        }
+      }
+      const items = rawDefinition.milestone.split(',');
+      if (items) {
+        return items.map(item => titleMap(item))
+      } else {
+        return [titleMap(rawDefinition.milestone)];
+      }
+    }
+    if (rawDefinition.link && rawDefinition.link.startsWith('https://github.com/devfile/devworkspace-operator/issues/')) {
+      return [`DWO/${rawDefinition.milestone}`];
+    }
+
+    return [`CHE/${rawDefinition.milestone}`];
+  
+  }
 }
