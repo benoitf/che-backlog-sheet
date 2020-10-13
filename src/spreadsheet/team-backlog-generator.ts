@@ -3,11 +3,9 @@ import { RawDefinition, TeamRawDefinition } from "./raw-definition";
 import { RowUpdater } from "./row-updater";
 import { TeamRowUpdater } from "./team-row-updater";
 import { TeamValidationUpdater } from "./team-validation-updater";
-import request = require("request");
 import * as moment from 'moment';
 import { CheVersionFetcher } from "../versions/che-version-fetcher";
 import { CrwVersionFetcher } from "../versions/crw-version-fetcher";
-import * as semver from "semver";
 import { TheiaVersionFetcher } from "../versions/theia-version-fetcher";
 
 enum SortCategory {
@@ -267,14 +265,15 @@ export class TeamBacklogGenerator {
 
       const teamSheetName = `${teamName}-prio`;
 
-      const legend =  `🚫 sev/blocker, 🔺 sev/critical|p1, 🔸 sev/major|p2, 🔹 sev/minor|p3 ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📦 kind/release, 📖 new&noteworthy, ⏰ stale (> 150days without update)`;
+      const legend1 = '🚫 sev/blocker, 🔺 sev(critical,p1), 🔸 sev(major,p2), 🔹 sev(minor,p3) ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📆 kind/planning, 📦 kind/release';
+      const legend2 = '📌 sprint/current-sprint, 🔖 sprint/next-sprint, 📖 new&noteworthy, ⏰ stale (> 150days without update)';
 
       const valuesUpdate = {
-        range: `${teamSheetName}!A${rowNewIndex}:A${rowNewIndex + 1}`,
-        values: [[legend]],
+        range: `${teamSheetName}!A${rowNewIndex}:A${rowNewIndex + 2}`,
+        values: [[legend1], [legend2]],
       };
       batchUpdates.push(valuesUpdate);
-      rowNewIndex = rowNewIndex + 2;
+      rowNewIndex = rowNewIndex + 3;
 
       // current che milestone =
       const cheVersionFetcher = new CheVersionFetcher();
@@ -323,6 +322,16 @@ export class TeamBacklogGenerator {
           }
           if (theiaPreviousSprintMilestone && issueMilestone.includes(theiaPreviousSprintMilestone)) {
               return SortCategory.PREVIOUS_SPRINT;
+          }
+          return undefined;
+        }
+
+        const sprintFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+          if (backlogIssueDef.labels && backlogIssueDef.labels.includes('sprint/current-sprint')) {
+            return SortCategory.CURRENT_SPRINT;
+          }
+          if (backlogIssueDef.labels && backlogIssueDef.labels.includes('sprint/next-sprint')) {
+            return SortCategory.NEXT_SPRINT;
           }
           return undefined;
         }
@@ -429,6 +438,7 @@ export class TeamBacklogGenerator {
 
         // sort filters from priority to bottom
         filters.push(previousFilter);
+        filters.push(sprintFilter);
         filters.push(currentFilter);
         filters.push(nextFilter);
         filters.push(recentFilter);
@@ -614,6 +624,8 @@ export class TeamBacklogGenerator {
                 prefix += `💡 `;
               } else if (kind.toLowerCase() === 'task') {
                 prefix += `🔧 `;
+              } else if (kind.toLowerCase() === 'planning') {
+                prefix += `📆 `;
               } else if (kind.toLowerCase() === 'release') {
                 prefix += `📦 `;
               } else {
@@ -643,7 +655,15 @@ export class TeamBacklogGenerator {
               }
             }
 
-            if (rawDefinition.labels && rawDefinition.labels.includes('new&noteworthy')) {
+            // current and next sprint
+            const labels: string = rawDefinition.labels || '';
+            if (labels.includes('sprint/current-sprint')) {
+              appendix += '📌 ';
+            }
+            if (labels.includes('sprint/next-sprint')) {
+              appendix += '🔖 ';
+            }
+            if (labels.includes('new&noteworthy')) {
               appendix += '📖 ';
             }
   
@@ -669,11 +689,11 @@ export class TeamBacklogGenerator {
             } else {
               status = ' ';
             }
-            let labels = this.getAreaLabels(rawDefinition.labels, ",");
-            if (labels.length  === 0) {
-              labels = ' ';
+            let areaLabels = this.getAreaLabels(rawDefinition.labels, ",");
+            if (areaLabels.length  === 0) {
+              areaLabels = ' ';
             }
-            return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, assignee, labels, status]
+            return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, assignee, areaLabels, status]
           });
           const endColumns = newValues[0].length;
 
