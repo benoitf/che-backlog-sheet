@@ -265,7 +265,7 @@ export class TeamBacklogGenerator {
 
       const teamSheetName = `${teamName}-prio`;
 
-      const legend1 = '🚫 sev/blocker, 🔺 sev(critical,p1), 🔸 sev(major,p2), 🔹 sev(minor,p3) ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📆 kind/planning, 📦 kind/release';
+      const legend1 = '🚫 sev(blocker), 🔺 sev(critical,p1), 🔸 sev(major,p2), 🔹 sev(minor,p3) ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📆 kind/planning, 📦 kind/release';
       const legend2 = '📌 sprint/current-sprint, 🔖 sprint/next-sprint, 📖 new&noteworthy, ⏰ stale (> 150days without update)';
 
       const valuesUpdate = {
@@ -378,14 +378,6 @@ export class TeamBacklogGenerator {
           return undefined;
         }
 
-       /* const newNoteworthyFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
-          if (backlogIssueDef.labels && backlogIssueDef.labels.includes('new&noteworthy')) {
-            return SortCategory.NEW_NOTEWORTHY;
-          }
-          return undefined;
-        }*/
-
-
         const severityCheck = (backlogIssueDef: RawDefinition, severity: string): boolean => {
           if (backlogIssueDef.severity && backlogIssueDef.severity.toLowerCase() === severity) {
             return true;
@@ -413,28 +405,6 @@ export class TeamBacklogGenerator {
         const githubP3Filter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           return severityCheck(backlogIssueDef, 'p3') ? SortCategory.GITHUB_P3 : undefined
         }
-
-/*
-        const notUpdatedSince4Months = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
-          let lastUpdated;
-          if (backlogIssueDef.created) {
-            lastUpdated = backlogIssueDef.created;
-          }
-          if (backlogIssueDef.updated) {
-            lastUpdated = backlogIssueDef.updated;
-          }
-
-          if (lastUpdated) {
-            const now = moment.utc();
-            const timestamp = parseInt(lastUpdated);
-            const lastUpdate = moment(timestamp);
-            const duration = moment.duration(now.diff(lastUpdate));
-            if (duration.asDays() > 150) {
-              return SortCategory.NOT_UPDATED_SINCE_5_MONTHS;
-            }
-          }
-          return undefined;
-        }*/
 
         // sort filters from priority to bottom
         filters.push(previousFilter);
@@ -517,35 +487,6 @@ export class TeamBacklogGenerator {
           return this.comparePriority(rawDefinition1, rawDefinition2);
         }
       });
-
-      // not updated, sort by least updated
-      /*sortedMap.get(SortCategory.NOT_UPDATED_SINCE_5_MONTHS)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
-
-        let updated1 = rawDefinition1.created;
-        let updated2 = rawDefinition2.created;
-        if (rawDefinition1.updated) {
-          updated1 = rawDefinition1.updated;
-        }
-        if (rawDefinition2.updated) {
-          updated2 = rawDefinition2.updated;
-        }
-
-        if (updated1 && updated2) {
-          if (updated1 === updated2) {
-            return this.compareIdentifier(rawDefinition1, rawDefinition2);
-          }
-          // least updated
-          if (parseInt(updated1) < parseInt(updated2)) {
-            return -1
-          } else if (parseInt(updated1) == parseInt(updated2)) {
-            return 0
-          } else {
-            return 1;
-          }
-        } else {
-          return this.compareIdentifier(rawDefinition1, rawDefinition2);
-        }
-      });*/
 
       // others = order by issue number
       sortedMap.get(SortCategory.BLOCKER)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
