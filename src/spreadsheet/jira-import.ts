@@ -424,8 +424,7 @@ export class JiraImport {
   public getLabels(issueData: any): string {
 
     const foundLabels: string[] = [];
-    // get areas label
-
+    // get components
     const components = issueData.fields.components;
     if (components) {
       components.forEach((component: any) => {
@@ -437,6 +436,12 @@ export class JiraImport {
             }
           }
         });
+    }
+
+    // add labels
+    const labels = issueData.fields.labels;
+    if (labels) {
+      foundLabels.push(labels);
     }
     foundLabels.sort();
 

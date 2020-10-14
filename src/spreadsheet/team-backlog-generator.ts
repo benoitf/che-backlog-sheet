@@ -529,7 +529,7 @@ export class TeamBacklogGenerator {
             values: [[title]],
           };
 
-
+          const notes: string[] = [];
           const newValues = values.map(rawDefinition => {
             // replace double quotes by simple quotes
             let title = rawDefinition.title.replace(/"/g, '\'');
@@ -634,6 +634,7 @@ export class TeamBacklogGenerator {
             if (areaLabels.length  === 0) {
               areaLabels = ' ';
             }
+            notes.push(labels.replace(/,/g, '\n'));
             return [`=HYPERLINK("${rawDefinition.link}", "${prefix}${title}")`, milestone, assignee, areaLabels, status]
           });
           const endColumns = newValues[0].length;
@@ -672,6 +673,7 @@ export class TeamBacklogGenerator {
               "fields": "userEnteredFormat(backgroundColor, textFormat)"
             }
           }
+
           const mergeCellRequest =
           {
             mergeCells: {
@@ -692,13 +694,34 @@ export class TeamBacklogGenerator {
           batchUpdates.push(update);
           rowNewIndex++;
 
-
           const valuesUpdate = {
             range: `${teamSheetName}!A${rowNewIndex}:E${rowNewIndex + values.length}`,
             values: newValues,
           };
           batchUpdates.push(valuesUpdate);
 
+          // add notes
+          notes.forEach((rowNote, index) => {
+            if (rowNote.length > 0) {
+              const noteCellRequest =
+              {
+                repeatCell: {
+                  range: {
+                    sheetId,
+                    startRowIndex: rowNewIndex - 1 + index,
+                    endRowIndex: rowNewIndex + index,
+                    startColumnIndex: 3,
+                    endColumnIndex: 4
+                  },
+                  cell: {
+                    note: rowNote
+                  },
+                  fields: "note"
+                }
+              }
+              batchUpdateOneOfRangeRequests.push(noteCellRequest);
+            }
+          });
 
           const style = {
             style: "SOLID_THICK",
@@ -736,10 +759,7 @@ export class TeamBacklogGenerator {
           };
           batchUpdates.push(emptyLineUpdate);
           rowNewIndex++;
-
-
         }
-
       });
 
       // update
