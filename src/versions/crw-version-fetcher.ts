@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as semver from 'semver';
 
 export class CrwVersionFetcher {
-  public static readonly CRW_POM_XML = 'https://raw.githubusercontent.com/redhat-developer/codeready-workspaces/master/pom.xml';
+  public static readonly CRW_POM_XML = 'https://raw.githubusercontent.com/redhat-developer/codeready-workspaces/HEAD/pom.xml';
 
   private version: Promise<string | undefined> | undefined;
 
