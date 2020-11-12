@@ -347,7 +347,7 @@ export class GithubImport {
     areasTeams.set("area/workspace-loader", "controller");
     areasTeams.set("area/cloudshell", "controller");
     areasTeams.set("area/devfile/v2", "controller");
-    
+    areasTeams.set("area/factory/dashboard", "controller");
 
     areasTeams.set("area/debugger", "plugins");
     areasTeams.set("area/devfile-registry", "plugins");
