@@ -268,13 +268,14 @@ export class TeamBacklogGenerator {
 
       const legend1 = '🚫 sev(blocker), 🔺 sev(critical,p1), 🔸 sev(major,p2), 🔹 sev(minor,p3) ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📆 kind/planning, 📦 kind/release';
       const legend2 = '📌 sprint/current-sprint, 🔖 sprint/next-sprint, 📖 new&noteworthy, ⏰ stale (> 150days without update)';
+      const legend3 = '🚕 customer low, 🚑 customer/medium, 🚒 customer/high';
 
       const valuesUpdate = {
         range: `${teamSheetName}!A${rowNewIndex}:A${rowNewIndex + 2}`,
-        values: [[legend1], [legend2]],
+        values: [[legend1], [legend2], [legend3]],
       };
       batchUpdates.push(valuesUpdate);
-      rowNewIndex = rowNewIndex + 3;
+      rowNewIndex = rowNewIndex + 4;
 
       // current che milestone =
       const cheVersionFetcher = new CheVersionFetcher();
@@ -610,6 +611,15 @@ export class TeamBacklogGenerator {
 
             // current and next sprint
             const labels: string = rawDefinition.labels || '';
+            if (labels.includes('cee_high')) {
+              appendix += '🚒 ';
+            } else if (labels.includes('cee_medium')) {
+              appendix += '🚑 ';
+            } else if (labels.includes('cee_low')) {
+              appendix += '🚕  ';
+            } else if (labels.includes('cee')) {
+              appendix += '🚕  ';
+            }              
             if (labels.includes('sprint/current-sprint')) {
               appendix += '📌 ';
             }
@@ -619,6 +629,9 @@ export class TeamBacklogGenerator {
             if (labels.includes('new&noteworthy')) {
               appendix += '📖 ';
             }
+            const legend3 = '🚓 customer low, 🚑 customer/medium, 🚒 customer/high';
+
+
   
             // prefix issue number
             title = `${this.shortIdentifier(rawDefinition)}: ${appendix}${title}`;
@@ -699,6 +712,55 @@ export class TeamBacklogGenerator {
               mergeType: "MERGE_ALL"
             }
           }
+
+          const redColor = {
+            red: 255 / 255,
+            green: 204 / 255,
+            blue: 203 / 255
+          }
+          const orangeColor = {
+            red: 254 / 255,
+            green: 216 / 255,
+            blue: 177 / 255
+          }
+          const yellowColor = {
+            red: 255 / 255,
+            green: 252 / 255,
+            blue: 187 / 255
+          }
+
+          // apply background based on customer issues
+          newValues.forEach((value, index) => {
+            const backgroundCeeRequest =
+          {
+            repeatCell: {
+              range: {
+                sheetId,
+                startRowIndex: rowNewIndex + index,
+                endRowIndex: rowNewIndex + index + 1,
+                startColumnIndex: 0,
+                endColumnIndex: endColumns
+              },
+              cell: {
+                userEnteredFormat: {
+                  backgroundColor: redColor,
+                }
+              },
+              "fields": "userEnteredFormat(backgroundColor)"
+            }
+          }
+            if (value[0].includes('🚒')) {
+              backgroundCeeRequest.repeatCell.cell.userEnteredFormat.backgroundColor = redColor;
+              batchUpdateOneOfRangeRequests.push(backgroundCeeRequest);
+            } else if (value[0].includes('🚑')) {
+              backgroundCeeRequest.repeatCell.cell.userEnteredFormat.backgroundColor = orangeColor;
+              batchUpdateOneOfRangeRequests.push(backgroundCeeRequest);
+            } else if (value[0].includes('🚕')) {
+              backgroundCeeRequest.repeatCell.cell.userEnteredFormat.backgroundColor = yellowColor;
+              batchUpdateOneOfRangeRequests.push(backgroundCeeRequest);
+            }
+          })
+
 
           batchUpdateOneOfRangeRequests.push(colorRequest);
           batchUpdateOneOfRangeRequests.push(mergeCellRequest);
