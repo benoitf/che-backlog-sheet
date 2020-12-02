@@ -14,6 +14,7 @@ enum SortCategory {
   NEXT_SPRINT = '',
   RECENT = 'RECENT ISSUES / LAST 3 Weeks order by priority then milestone / Automatically updated',
   BLOCKER = 'Blocker issues / Automatically updated',
+  E2E_TEST_FAILURE = 'E2E tests / Automatically updated',
   JIRA_CRITICAL = 'JIRA Critical issues / Automatically updated',
   GITHUB_P1 = 'Github P1 issues / Automatically updated',
   JIRA_MAJOR = 'JIRA Major issues / Automatically updated',
@@ -378,6 +379,13 @@ export class TeamBacklogGenerator {
           return undefined;
         }
 
+        const e2eTestsFailureFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+          if (backlogIssueDef.labels && backlogIssueDef.labels.includes('e2e-test/failure')) {
+              return SortCategory.E2E_TEST_FAILURE;
+          }
+          return undefined;
+        }
+
         const severityCheck = (backlogIssueDef: RawDefinition, severity: string): boolean => {
           if (backlogIssueDef.severity && backlogIssueDef.severity.toLowerCase() === severity) {
             return true;
@@ -415,6 +423,7 @@ export class TeamBacklogGenerator {
         // filters.push(notUpdatedSince4Months);
         // filters.push(newNoteworthyFilter);
         filters.push(blockerFilter);
+        filters.push(e2eTestsFailureFilter);
         filters.push(jiraCriticalFilter);
         filters.push(githubP1Filter);
         filters.push(jiraMajorFilter);
@@ -490,6 +499,9 @@ export class TeamBacklogGenerator {
 
       // others = order by issue number
       sortedMap.get(SortCategory.BLOCKER)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+        return this.compareIdentifier(rawDefinition1, rawDefinition2);
+      });
+      sortedMap.get(SortCategory.E2E_TEST_FAILURE)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
         return this.compareIdentifier(rawDefinition1, rawDefinition2);
       });
       sortedMap.get(SortCategory.GITHUB_P1)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
