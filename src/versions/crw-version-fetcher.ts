@@ -34,8 +34,8 @@ export class CrwVersionFetcher {
     if (version) {
       const crwMilestoneSemver = semver.coerce(version);
       if (crwMilestoneSemver) {
-        const minorPlusOne = crwMilestoneSemver.minor;
-        return `${crwMilestoneSemver?.major}.${minorPlusOne}.${crwMilestoneSemver.patch}.GA`;
+        const minor = crwMilestoneSemver.minor - 1;
+        return `${crwMilestoneSemver?.major}.${minor}.${crwMilestoneSemver.patch}.GA`;
       }
     }
     return undefined;
@@ -46,8 +46,8 @@ export class CrwVersionFetcher {
     if (version) {
       const crwMilestoneSemver = semver.coerce(version);
       if (crwMilestoneSemver) {
-        const minorPlusOne = crwMilestoneSemver.minor + 1;
-        return `${crwMilestoneSemver?.major}.${minorPlusOne}.${crwMilestoneSemver.patch}.GA`;
+        const minor = crwMilestoneSemver.minor;
+        return `${crwMilestoneSemver?.major}.${minor}.${crwMilestoneSemver.patch}.GA`;
       }
     }
     return undefined;
@@ -58,8 +58,8 @@ export class CrwVersionFetcher {
     if (version) {
       const crwMilestoneSemver = semver.coerce(version);
       if (crwMilestoneSemver) {
-        const minorPlusOne = crwMilestoneSemver.minor - 1;
-        return `${crwMilestoneSemver?.major}.${minorPlusOne}.${crwMilestoneSemver.patch}.GA`;
+        const minor = crwMilestoneSemver.minor - 2;
+        return `${crwMilestoneSemver?.major}.${minor}.${crwMilestoneSemver.patch}.GA`;
       }
     }
     return undefined;
