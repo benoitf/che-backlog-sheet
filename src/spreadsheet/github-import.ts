@@ -340,6 +340,7 @@ export class GithubImport {
     areasTeams.set("area/dashboard", "controller");
     areasTeams.set("area/plugin-broker", "controller");
     areasTeams.set("area/dev-workspace", "controller");
+    areasTeams.set("area/dev-workspace-client", "controller");
     areasTeams.set("area/infra/kubernetes", "controller");
     areasTeams.set("area/infra/openshift", "controller");
     areasTeams.set("area/ts-workspace-client", "controller");
