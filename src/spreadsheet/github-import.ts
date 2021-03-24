@@ -88,7 +88,7 @@ export class GithubImport {
     // update to include team to be hosted-che
     const updatedIssues = response.map((issueData: any) => {
       const labels = issueData.labels;
-      const devWorkspaceLabel = { name: 'area/dev-workspace' };
+      const devWorkspaceLabel = { name: 'area/devworkspace-operator' };
       if (!labels) {
         issueData.labels = [devWorkspaceLabel];
       } else {
@@ -318,6 +318,7 @@ export class GithubImport {
     areasTeams.set("area/devfile", "platform");
     areasTeams.set("area/wsmaster", "platform");
     areasTeams.set("area/cheserver", "platform");
+    areasTeams.set("area/che-server", "platform");
     areasTeams.set("area/factories", "platform");
     areasTeams.set("area/factory/server", "platform");
     areasTeams.set("area/security", "platform");
@@ -338,8 +339,8 @@ export class GithubImport {
     areasTeams.set("area/whitelabel", "productization");
 
     areasTeams.set("area/dashboard", "controller");
+    areasTeams.set("area/devworkspace-operator", "controller");
     areasTeams.set("area/plugin-broker", "controller");
-    areasTeams.set("area/dev-workspace", "controller");
     areasTeams.set("area/dev-workspace-client", "controller");
     areasTeams.set("area/infra/kubernetes", "controller");
     areasTeams.set("area/infra/openshift", "controller");
