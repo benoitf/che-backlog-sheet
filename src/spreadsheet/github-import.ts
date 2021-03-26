@@ -326,7 +326,8 @@ export class GithubImport {
     areasTeams.set("area/workspace-sharing", "platform");
     areasTeams.set("area/jwt-proxy", "platform");
     areasTeams.set("area/devfile/v1", "platform");
-
+    areasTeams.set("area/infra/kubernetes", "platform");
+    areasTeams.set("area/infra/openshift", "platform");
 
     areasTeams.set("area/cli", "deploy");
     areasTeams.set("area/chectl", "deploy");
@@ -339,17 +340,13 @@ export class GithubImport {
     areasTeams.set("area/whitelabel", "productization");
 
     areasTeams.set("area/dashboard", "controller");
-    areasTeams.set("area/devworkspace-operator", "controller");
-    areasTeams.set("area/plugin-broker", "controller");
-    areasTeams.set("area/dev-workspace-client", "controller");
-    areasTeams.set("area/infra/kubernetes", "controller");
-    areasTeams.set("area/infra/openshift", "controller");
-    areasTeams.set("area/ts-workspace-client", "controller");
-    areasTeams.set("area/workspace-client-lib", "controller");
-    areasTeams.set("area/workspace-loader", "controller");
-    areasTeams.set("area/cloudshell", "controller");
-    areasTeams.set("area/devfile/v2", "controller");
     areasTeams.set("area/factory/dashboard", "controller");
+    areasTeams.set("area/devworkspace-client", "controller");
+    areasTeams.set("area/ts-workspace-client", "controller");
+    areasTeams.set("area/plugin-broker", "controller");
+    areasTeams.set("area/devworkspace-operator", "controller");
+    areasTeams.set("area/devfile/v2", "controller");
+    areasTeams.set("area/cloudshell", "controller");
 
     areasTeams.set("area/debugger", "plugins");
     areasTeams.set("area/devfile-registry", "plugins");
