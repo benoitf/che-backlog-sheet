@@ -912,6 +912,7 @@ export class TeamBacklogGenerator {
         const backlogIssueDef: RawDefinition = this.rowUpdater.getDefinition(row);
 
         const issueAreas = this.getAreaLabels(backlogIssueDef.labels);
+        const sprintDefinition = this.getSprintLabels(backlogIssueDef.labels);
         const issuePriority = includedTeamPriority.get(backLogIssueLink) || "";
 
         if (teamBackLogIssueMapping.has(backLogIssueLink)) {
@@ -933,10 +934,11 @@ export class TeamBacklogGenerator {
           teamIssueDef.assignment = "TRUE";
           teamIssueDef.areas = issueAreas;
           teamIssueDef.assignee = backlogIssueDef.assignee;
+          teamIssueDef.sprint = sprintDefinition;
 
           // update row columns
           const update = {
-            range: `${teamSheetName}!A${rowNumber}:M${rowNumber}`,
+            range: `${teamSheetName}!A${rowNumber}:N${rowNumber}`,
             values: [teamRowUpdater.getRow(teamIssueDef)],
           };
 
@@ -958,6 +960,7 @@ export class TeamBacklogGenerator {
             status: backlogIssueDef.status,
             areas: issueAreas,
             assignee: backlogIssueDef.assignee,
+            sprint: sprintDefinition,
 
           };
 
@@ -999,6 +1002,17 @@ export class TeamBacklogGenerator {
     } else {
       return '';
     }
+  }
+
+  getSprintLabels(labelLine: string, separator?: string): string {
+    if (labelLine) {
+      if (labelLine.includes('sprint/current-sprint')) {
+        return 'current';
+      } else if (labelLine.includes('sprint/next-sprint')) {
+        return 'next';
+      }
+    }
+    return '';
   }
 
   protected getMilestoneVersions(rawDefinition: RawDefinition): string[] {

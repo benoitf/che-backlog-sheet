@@ -87,6 +87,9 @@ export class TeamRowUpdater {
     if (this.mapping.has(TeamRowUpdater.ASSIGNEE)) {
       buildRow[this.mapping.get(TeamRowUpdater.ASSIGNEE)!] = rawDefinition.assignee;
     }
+    if (this.mapping.has(TeamRowUpdater.SPRINT)) {
+      buildRow[this.mapping.get(TeamRowUpdater.SPRINT)!] = rawDefinition.sprint;
+    }
 
     return buildRow;
 
@@ -107,6 +110,7 @@ export class TeamRowUpdater {
       state: row[this.mapping.get(TeamRowUpdater.STATE)!],
       status: row[this.mapping.get(TeamRowUpdater.STATUS)!],
       assignee: row[this.mapping.get(TeamRowUpdater.ASSIGNEE)!],
+      sprint: row[this.mapping.get(TeamRowUpdater.SPRINT)!],
     };
   }
 

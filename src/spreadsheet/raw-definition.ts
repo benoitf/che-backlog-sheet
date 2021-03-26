@@ -27,6 +27,7 @@ export interface TeamRawDefinition {
   milestone: string;
   otherTeam: string;
   comments: string;
+  sprint: string;
   state: string;
   status: string;
   areas: string;
