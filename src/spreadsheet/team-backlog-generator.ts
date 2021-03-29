@@ -36,16 +36,7 @@ export class TeamBacklogGenerator {
   ) {
     this.teamSheetIds = new Map();
     this.teamSheetIds.set("controller", 559612723);
-    this.teamSheetIds.set("deploy", 299792844);
-    this.teamSheetIds.set("devex", 1791827752);
-    this.teamSheetIds.set("doc", 1387892873);
-    this.teamSheetIds.set("editors", 147601621);
-    this.teamSheetIds.set("hosted-che", 602575269);
-    this.teamSheetIds.set("platform", 615179376);
-    this.teamSheetIds.set("plugins", 620995623);
-    this.teamSheetIds.set("pm", 500634577);
     this.teamSheetIds.set("qe", 287072407);
-    this.teamSheetIds.set("productization", 52078153);
     this.prioritizationSheetIds = new Map();
     this.prioritizationSheetIds.set("controller", 1025310347);
     this.prioritizationSheetIds.set("deploy", 2057979220);
