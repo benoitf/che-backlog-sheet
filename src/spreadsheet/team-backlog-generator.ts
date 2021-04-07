@@ -258,7 +258,7 @@ export class TeamBacklogGenerator {
       const teamSheetName = `${teamName}-prio`;
 
       const legend1 = '🚫 sev(blocker), 🔺 sev(critical,p1), 🔸 sev(major,p2), 🔹 sev(minor,p3) ✨ kind/epic, 🐞 kind/bug, 🤔 kind/question, 💡 kind/enhancement, 🔧 kind/task, 📆 kind/planning, 📦 kind/release';
-      const legend2 = '📌 sprint/current-sprint, 🔖 sprint/next-sprint, 📖 new&noteworthy, ⏰ stale (> 150days without update)';
+      const legend2 = '📌 sprint/current, 🔖 sprint/next, 📖 new&noteworthy, ⏰ stale (> 150days without update)';
       const legend3 = '🚕 customer low, 🚑 customer/medium, 🚒 customer/high';
 
       const valuesUpdate = {
@@ -320,10 +320,10 @@ export class TeamBacklogGenerator {
         }
 
         const sprintFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
-          if (backlogIssueDef.labels && backlogIssueDef.labels.includes('sprint/current-sprint')) {
+          if (backlogIssueDef.labels && (backlogIssueDef.labels.includes('sprint/current') || backlogIssueDef.labels.includes('sprint/current-sprint'))) {
             return SortCategory.CURRENT_SPRINT;
           }
-          if (backlogIssueDef.labels && backlogIssueDef.labels.includes('sprint/next-sprint')) {
+          if (backlogIssueDef.labels && (backlogIssueDef.labels.includes('sprint/next') || backlogIssueDef.labels.includes('sprint/next-sprint'))) {
             return SortCategory.NEXT_SPRINT;
           }
           return undefined;
@@ -611,10 +611,10 @@ export class TeamBacklogGenerator {
             } else if (labels.includes('cee')) {
               appendix += '🚕  ';
             }              
-            if (labels.includes('sprint/current-sprint')) {
+            if (labels.includes('sprint/current-sprint') || labels.includes('sprint/current')) {
               appendix += '📌 ';
             }
-            if (labels.includes('sprint/next-sprint')) {
+            if (labels.includes('sprint/next-sprint') || labels.includes('sprint/next')) {
               appendix += '🔖 ';
             }
             if (labels.includes('new&noteworthy')) {
@@ -997,9 +997,9 @@ export class TeamBacklogGenerator {
 
   getSprintLabels(labelLine: string, separator?: string): string {
     if (labelLine) {
-      if (labelLine.includes('sprint/current-sprint')) {
+      if (labelLine.includes('sprint/current-sprint') || labelLine.includes('sprint/current')) {
         return 'current';
-      } else if (labelLine.includes('sprint/next-sprint')) {
+      } else if (labelLine.includes('sprint/next-sprint') || labelLine.includes('sprint/next')) {
         return 'next';
       }
     }
