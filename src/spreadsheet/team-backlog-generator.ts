@@ -11,6 +11,7 @@ import { TheiaVersionFetcher } from "../versions/theia-version-fetcher";
 enum SortCategory {
   PREVIOUS_SPRINT = '',
   CURRENT_SPRINT = '',
+  CURRENT_MILESTONE_WITHOUT_CURRENT_SPRINT = '',
   NEXT_SPRINT = '',
   RECENT = 'RECENT ISSUES / LAST 3 Weeks order by priority then milestone / Automatically updated',
   BLOCKER = 'Blocker issues / Automatically updated',
@@ -278,21 +279,18 @@ export class TeamBacklogGenerator {
       // current CRW milestone =
       const crwVersionFetcher = new CrwVersionFetcher();
       await crwVersionFetcher.init();
-      const crwCurrentSprintMilestone = `CRW/${await crwVersionFetcher.getCurrentSprint()}`;
-      const crwNextSprintMilestone = `CRW/${await crwVersionFetcher.getNextSprint()}`;
       const crwPreviousSprintMilestone = `CRW/${await crwVersionFetcher.getPreviousSprint()}`;
 
       // current Theia milestone =
       const theiaVersionFetcher = new TheiaVersionFetcher();
       await theiaVersionFetcher.init();
-      const theiaCurrentSprintMilestone = `THEIA/${await theiaVersionFetcher.getCurrentSprint()}`;
-      const theiaNextSprintMilestone = `THEIA/${await theiaVersionFetcher.getNextSprint()}`;
       const theiaPreviousSprintMilestone = `THEIA/${await theiaVersionFetcher.getPreviousSprint()}`;
       
       // update title
       (SortCategory as any)['PREVIOUS_SPRINT'] = `Ended Sprint (${chePreviousprintMilestone} ${crwPreviousSprintMilestone} ${theiaPreviousSprintMilestone}) / order by priority then milestone / Automatically updated`;
-      (SortCategory as any)['CURRENT_SPRINT'] = `Current Sprint (${cheCurrentSprintMilestone} ${crwCurrentSprintMilestone} ${theiaCurrentSprintMilestone}) / order by priority then milestone / Automatically updated`;
-      (SortCategory as any)['NEXT_SPRINT'] = `Candidate Sprint (${cheNextSprintMilestone} ${crwNextSprintMilestone} ${theiaNextSprintMilestone}) / order by priority then milestone / Automatically updated`;
+      (SortCategory as any)['CURRENT_SPRINT'] = `Current Sprint (${cheCurrentSprintMilestone}) / order by priority then milestone / Automatically updated`;
+      (SortCategory as any)['NEXT_SPRINT'] = `Candidate Sprint (${cheNextSprintMilestone}) / order by priority then milestone / Automatically updated`;
+      (SortCategory as any)['CURRENT_MILESTONE_WITHOUT_CURRENT_SPRINT'] = `Current che milestone (${cheNextSprintMilestone}) without sprint/current label / Automatically updated`;
 
       // initialize map
       const sortedMap: Map<SortCategory, RawDefinition[]> = new Map();
@@ -331,7 +329,7 @@ export class TeamBacklogGenerator {
 
         const currentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           const issueMilestone = this.getMilestoneVersions(backlogIssueDef);
-          if (cheCurrentSprintMilestone && issueMilestone.includes(cheCurrentSprintMilestone)) {
+          /*if (cheCurrentSprintMilestone && issueMilestone.includes(cheCurrentSprintMilestone)) {
               return SortCategory.CURRENT_SPRINT;
           }
           if (crwCurrentSprintMilestone && issueMilestone.includes(crwCurrentSprintMilestone)) {
@@ -339,13 +337,23 @@ export class TeamBacklogGenerator {
           }
           if (theiaCurrentSprintMilestone && issueMilestone.includes(theiaCurrentSprintMilestone)) {
               return SortCategory.CURRENT_SPRINT;
+          }*/
+          return undefined;
+        }
+
+        const currentMilestoneWithoutCurrentFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
+          const issueMilestone = this.getMilestoneVersions(backlogIssueDef);
+          if (cheCurrentSprintMilestone && issueMilestone.includes(cheCurrentSprintMilestone)) {
+            if (backlogIssueDef.labels && !backlogIssueDef.labels.includes('sprint/current') && !backlogIssueDef.labels.includes('sprint/current-sprint')) {
+              return SortCategory.CURRENT_MILESTONE_WITHOUT_CURRENT_SPRINT;
+            }
           }
           return undefined;
         }
 
         const nextFilter = (backlogIssueDef: RawDefinition): SortCategory | undefined => {
           const issueMilestone = this.getMilestoneVersions(backlogIssueDef);
-          if (cheNextSprintMilestone && issueMilestone.includes(cheNextSprintMilestone)) {
+          /*if (cheNextSprintMilestone && issueMilestone.includes(cheNextSprintMilestone)) {
             return SortCategory.NEXT_SPRINT;
           }
           if (crwNextSprintMilestone && issueMilestone.includes(crwNextSprintMilestone)) {
@@ -353,7 +361,7 @@ export class TeamBacklogGenerator {
           }
           if (theiaNextSprintMilestone && issueMilestone.includes(theiaNextSprintMilestone)) {
             return SortCategory.NEXT_SPRINT;
-          }
+          }*/
           return undefined;
         }
 
@@ -411,6 +419,7 @@ export class TeamBacklogGenerator {
         filters.push(sprintFilter);
         filters.push(currentFilter);
         filters.push(nextFilter);
+        filters.push(currentMilestoneWithoutCurrentFilter);
         filters.push(recentFilter);
         // filters.push(notUpdatedSince4Months);
         // filters.push(newNoteworthyFilter);
@@ -509,6 +518,9 @@ export class TeamBacklogGenerator {
         return this.compareIdentifier(rawDefinition1, rawDefinition2);
       });
       sortedMap.get(SortCategory.JIRA_MAJOR)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
+        return this.compareIdentifier(rawDefinition1, rawDefinition2);
+      });
+      sortedMap.get(SortCategory.CURRENT_MILESTONE_WITHOUT_CURRENT_SPRINT)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
         return this.compareIdentifier(rawDefinition1, rawDefinition2);
       });
       /*sortedMap.get(SortCategory.NEW_NOTEWORTHY)!.sort((rawDefinition1: RawDefinition, rawDefinition2: RawDefinition) => {
@@ -622,8 +634,6 @@ export class TeamBacklogGenerator {
             }
             const legend3 = '🚓 customer low, 🚑 customer/medium, 🚒 customer/high';
 
-
-  
             // prefix issue number
             title = `${this.shortIdentifier(rawDefinition)}: ${appendix}${title}`;
 
@@ -835,8 +845,6 @@ export class TeamBacklogGenerator {
       if (batchUpdateOneOfRangeRequests.length > 0) {
         await this.googleSheet.batchUpdateOneOfRangeRequests(batchUpdateOneOfRangeRequests);
       }
-
-
     })));
 
     await Promise.all(Array.from(this.teamSheetIds.keys()).map(async (teamName) => {
