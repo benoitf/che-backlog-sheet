@@ -104,7 +104,7 @@ export class JiraImport {
     // update to include team to be hosted-che
     const updatedIssues = mergedIssues.map((issueData: any) => {
       const components = issueData.fields.components;
-      const controllerComponent = { name: 'area/cloudshell' };
+      const controllerComponent = { name: 'area/webterminal' };
       if (!components) {
         issueData.fields.components = [controllerComponent];
       } else {
@@ -348,7 +348,7 @@ export class JiraImport {
   public getTeam(issueData: any): string {
 
     const areasTeams = new Map();
-    areasTeams.set("OpenShift Command Line Terminal (cloudshell)", "controller");
+    areasTeams.set("OpenShift Web Terminal", "controller");
     areasTeams.set("controller: dashboard, dev-workspace, factory/dashboard, plugin broker, ts-workspace-client, workspace-loader", "controller");
     areasTeams.set("deploy: cli, install, machine-exec, operator", "deploy");
     areasTeams.set("devex: workshops, RHPDS", "devex");
@@ -363,7 +363,7 @@ export class JiraImport {
     areasTeams.set("testing", "qe");
     areasTeams.set("hosted che: telemetry, kubernetes-image-puller", "hosted-che");
     areasTeams.set("area/hosted-che", "hosted-che");
-    areasTeams.set("area/cloudshell", "controller");
+    areasTeams.set("area/webterminal", "controller");
     areasTeams.set("area/doc", "doc");
 
 
