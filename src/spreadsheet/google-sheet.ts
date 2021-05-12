@@ -51,7 +51,7 @@ export class GoogleSheet {
       sheets.spreadsheets.values.append({
         auth: this.oAuth2Client,
         spreadsheetId: this.id,
-        range: `${sheetName}!A1:V`,
+        range: `${sheetName}!A1`,
         valueInputOption: "USER_ENTERED",
         resource,
       } as any, (err: any, res: any) => {
