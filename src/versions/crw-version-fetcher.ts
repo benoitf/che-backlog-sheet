@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as semver from 'semver';
 
 export class CrwVersionFetcher {
-  public static readonly CRW_POM_XML = 'https://raw.githubusercontent.com/redhat-developer/codeready-workspaces/HEAD/pom.xml';
+  public static readonly CRW_VERSION = 'https://raw.githubusercontent.com/redhat-developer/codeready-workspaces/HEAD/dependencies/VERSION';
 
   private version: Promise<string | undefined> | undefined;
 
@@ -10,15 +10,11 @@ export class CrwVersionFetcher {
     // first, get CRW latest version
     const grabCRWVersion = /<\/parent>[^]*<version>(\d+\.\d+\.\d(?:-.*\d)*.GA)(?:-SNAPSHOT)?<\/version>[^]*<packaging>/gm;
 
-    const response = await axios.get(CrwVersionFetcher.CRW_POM_XML);
+    const response = await axios.get(CrwVersionFetcher.CRW_VERSION);
     const data = response.data;
 
-    const parsedVersion = grabCRWVersion.exec(data);
-    if (parsedVersion) {
-      return parsedVersion[1];
-    } else {
-      return undefined;
-    }
+    const parsedVersion = `${data}.0`;
+    return parsedVersion;
   }
 
   public async getVersion(): Promise<string | undefined> {
