@@ -2,14 +2,14 @@ import axios from 'axios';
 import * as semver from 'semver';
 
 export class CheVersionFetcher {
-  public static readonly CHE_POM_XML = 'https://raw.githubusercontent.com/eclipse/che/master/pom.xml';
+  public static readonly CHE_POM_XML = 'https://raw.githubusercontent.com/eclipse-che/che-server/HEAD/pom.xml';
 
   private version: Promise<string | undefined> | undefined;
 
    async init(): Promise<string | undefined> {
     // first, get che latest version
-    const grabCheVersion = /<\/parent>[^]*<version>(\d+\.\d+\.\d(?:-.*\d)*)(?:-SNAPSHOT)?<\/version>[^]*<packaging>/gm;
-
+    const grabCheVersion = /<artifactId>che-server<\/artifactId>[^]*<version>(\d+\.\d+\.\d(?:-.*\d)*)(?:-SNAPSHOT)?<\/version>[^]*<packaging>/gm;
+    
     const response = await axios.get(CheVersionFetcher.CHE_POM_XML);
     const data = response.data;
 
