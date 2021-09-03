@@ -28,5 +28,6 @@ jobs:
             ${{ runner.os }}-yarn-
       - name: build and run
         run: |
+          yarn
           yarn run compile
           node scripts/main.js
