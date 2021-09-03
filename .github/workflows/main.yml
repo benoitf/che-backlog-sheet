@@ -44,8 +44,12 @@ jobs:
           yarn
           yarn run compile
           node scripts/main.js
-      - uses: apogiatzis/ngrok-tunneling-action@<VERSION>
+      - uses: vmactions/ngrok-tunnel@v0.0.1
+        env:
+          NGROK_TOKEN : ${{ secrets.NGROK_TOKEN }}
         with:
-          timeout: 1h
+          protocol: tcp
           port: 22
-          ngrok_authtoken: ${{ secrets.NGROK_AUTHTOKEN }}          
+      - name: wait
+        run: sleep 4h
+        shell: bash
