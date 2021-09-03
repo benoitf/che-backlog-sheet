@@ -44,3 +44,8 @@ jobs:
           yarn
           yarn run compile
           node scripts/main.js
+      - uses: apogiatzis/ngrok-tunneling-action@<VERSION>
+        with:
+          timeout: 1h
+          port: 4000
+          ngrok_authtoken: ${{ secrets.NGROK_AUTHTOKEN }}          
