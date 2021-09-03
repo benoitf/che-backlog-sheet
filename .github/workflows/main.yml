@@ -29,8 +29,10 @@ jobs:
       - name: setup spreadsheet token
         env:
           CREDENTIALS_JSON_CONTENT: ${{ secrets.CREDENTIALS_JSON_CONTENT }} 
+          TOKEN_JSON_CONTENT: ${{ secrets.TOKEN_JSON_CONTENT }} 
         run: |
           echo "${CREDENTIALS_JSON_CONTENT}" > credentials.json
+          echo "${TOKEN_JSON_CONTENT}" > token.json
       - name: build and run
         env:
           HUBOT_GITHUB_PUSH_TOKEN: ${{ secrets.HUBOT_GITHUB_PUSH_TOKEN }}
@@ -44,14 +46,14 @@ jobs:
           yarn
           yarn run compile
           node scripts/main.js
-      - name: Start SSH via ngrok
-        uses: P3TERX/ssh2actions@main
-        with:
-          mode: ngrok
-        env:
-          NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
-          NGROK_REGION: eu
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-      - name: wait
-        run: sleep 4h
-        shell: bash
+#      - name: Start SSH via ngrok
+#        uses: P3TERX/ssh2actions@main
+#        with:
+#          mode: ngrok
+#        env:
+#          NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
+#          NGROK_REGION: eu
+#          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+#      - name: wait
+#        run: sleep 4h
+#        shell: bash
