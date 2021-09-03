@@ -27,8 +27,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: setup spreadsheet token
+        env:
+          CREDENTIALS_JSON_CONTENT: ${{ secrets.CREDENTIALS_JSON_CONTENT }} 
         run: |
-          echo "${{ secrets.CREDENTIALS_JSON_CONTENT }}" > credentials.json
+          echo "{$CREDENTIALS_JSON_CONTENT}" > credentials.json
       - name: build and run
         env:
           HUBOT_GITHUB_PUSH_TOKEN: ${{ secrets.HUBOT_GITHUB_PUSH_TOKEN }}
