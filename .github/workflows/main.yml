@@ -27,6 +27,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: build and run
+        env:
+          HUBOT_GITHUB_PUSH_TOKEN: ${{ secrets.HUBOT_GITHUB_PUSH_TOKEN }}
+          HUBOT_GITHUB_TOKEN: ${{ secrets.HUBOT_GITHUB_TOKEN }}
+          MATTERMOST_GROUP: ${{ secrets.MATTERMOST_GROUP }}
+          MATTERMOST_HOST: ${{ secrets.MATTERMOST_HOST }}
+          MATTERMOST_PASSWORD: ${{ secrets.MATTERMOST_PASSWORD }}
+          MATTERMOST_USER: ${{ secrets.MATTERMOST_USER }}
+          REDHAT_JIRA_TOKEN: ${{ secrets.REDHAT_JIRA_TOKEN }}
         run: |
           yarn
           yarn run compile
