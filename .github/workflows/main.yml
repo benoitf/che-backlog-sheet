@@ -28,7 +28,7 @@ jobs:
             ${{ runner.os }}-yarn-
       - name: setup spreadsheet token
         run: |
-          echo ${{ secrets.CREDENTIALS_JSON_CONTENT }} > credentials.json
+          echo "${{ secrets.CREDENTIALS_JSON_CONTENT }}" > credentials.json
       - name: build and run
         env:
           HUBOT_GITHUB_PUSH_TOKEN: ${{ secrets.HUBOT_GITHUB_PUSH_TOKEN }}
