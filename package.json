@@ -28,7 +28,7 @@
     "@types/mocha": "^8.0.2",
     "@types/request": "^2.48.5",
     "@types/semver": "^7.3.3",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "chai": "^4.2.0",
     "codecov": "^3.7.2",
     "mocha": "^8.1.1",
